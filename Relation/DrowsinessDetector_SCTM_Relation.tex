@@ -13,6 +13,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%comando per la gestione semplificata di quotes
 \newcommand{\quotes}[1]{``#1''}
 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%libreria per l'inserimento di link nella
+%   bibliografia
+\PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
+
 \linespread{1.2}
 \setlength{\parindent}{0pt}
 
@@ -67,23 +72,15 @@ Marcin Pabich\\[3cm]
 
 \section{Introduzione}
 
-Esporre l’obiettivo del progetto dandone una visione complessiva.\\
-
-Devono essere illustrate le caratteristiche salienti del progetto; deve essere chiara la distinzione tra le tecnologie usate/assemblate durante lo svolgimento dell'elaborato e il contributo tecnologico/scientifico effettivamente apportato dal gruppo.\\
-
-
-Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nelle immagini, schemi):
-
-\vspace{1cm}
-\begin{tabular}{l|rr}
- & Numero minimo di battute & Numero massimo di battute \\
- \hline
- 1 componente & 2000 & 3000 \\
- 2 componenti & 2500 & 4500 \\
- 3 componenti & 3000 & 6000 \\
- \hline
-\end{tabular}
-
+Il deterioramento delle capacità alla guida causato da sonnolenza è noto per essere uno dei fattori che contribuiscono maggiormente alla formazione di incidenti automobilistici. Secondo un sondaggio del 2011 realizzato dalla National Sleep Foundation sulla popolazione americana, circa il 30\% degli incidenti su strada è dovuto all'affaticamento del conducente e tale dato tende a crescere di anno in anno \cite{SleepInAmerica}.\\
+La sonnolenza costituisce nello specifico una fase di transizione nel ciclo sonno-veglia, determinante uno stato di torpore e una riduzione del livello di coscienza del guidatore. Essa può essere dovuta a diversi fattori: condizioni di guida avverse, traffico intenso, alti carichi di lavoro, scarso riposo, orari notturni, abuso di alcol e assunzione di medicinali sono solo alcuni esempi.\\
+Misurare direttamente il livello di sonnolenza è complesso, ma esistono tuttavia numerosi metodi indiretti capaci di rilevare aspetti correlati e che oggi costituiscono la base per i vari sistemi disponibili sul mercato. Le misure di segnali fisiologici sono le più accurate ma comprendono tecniche quali ECG (elettrocardiogramma), EOG (elettrooculogramma) ed EEG (elettroencefalogramma) che faticano a essere adottate nella realtà a causa della connessione fisica che richiedono con l'autista.\\
+La maggior parte delle soluzioni attualmente disponibili e impiegate dalle case automobilistiche riguardano misure basate sul veicolo e comprendono pertanto l'individuazione di scostamenti rispetto alla propria corsia, la pressione esercitata sui pedali e il movimento delle ruote sterzanti.\\
+Negli ultimi anni, invece, si stanno sempre più diffondendo soluzioni basate su misure di tipo comportamentale che consentono in genere di rilevare la sonnolenza alla guida in modo precoce. Queste misurazioni si concentrono sul movimento degli occhi, sull'oscillazione della testa e sui cambiamenti facciali. Una persona assonnata, infatti, ha la tendenza a sbattere le palpebre frequentemente, a chiudere gli occhi, a sbadigliare ripetutamente e a inclinare la testa di una certa angolatura, ad esempio.\\
+Il progetto descritto in questo documento si pone l'obiettivo di realizzare un sistema a basso costo, affidabile e non intrusivo per il riconoscimento della stanchezza del conducente in tempo reale, svolgendo un monitoraggio video sul suo volto e applicando tecniche di Computer Vision sui frame catturati. L'implementazione della soluzione si basa sull'uso di un \textit{Raspberry Pi 3 B+}, un single-board computer noto per le sue caratteristiche prestazionali rapportate al prezzo e alle dimensioni che lo contraddistinguono.\\
+Il sistema acquisisce le immagini dell'utente per mezzo di una camera installata nell'automobile e posizionata frontalmente a esso. La sonnolenza del guidatore è successivamente calcolata in riferimento a una misura comportamentale incentrata sulla chiusura degli occhi (stimata quantitativamente con metodologia \textit{EAR}\footnote{EAR. Eye Aspect Ratio.}\cite{EAR}). A fronte di una chiusura degli occhi protrattasi oltre un tempo definito, il sistema riproduce un allarme per mezzo di un buzzer acustico al fine di reclamare l'attenzione dell'utente ed evidenziare il potenziale pericolo che sta incorrendo.\\
+Le principali tecnologie adottate sono \textit{Python} a livello di linguaggio di programmazione, \textit{OpenCV} come libreria per la manipolazione di foto e video, \textit{dlib} per quanto concerne gli algoritmi di machine learning per l'individuazione e la localizzazione di facial landmark.\\
+Il contributo tecnologico/scientifico apportato dal gruppo con l'elaborato in esame si riferisce allo studio e al confronto prestazionale delle varie soluzioni che possono adottate, specie in relazione ai limiti dell'hardware adottato. Una particolare attenzione è riposta nelle tecniche di riconoscimento facciale alla base, note per essere l'elemento centrale sia per la determinazione dell'efficacia del sistema nei vari scenari d'uso che per la sua reale efficienza.
 
 \newpage
 
@@ -315,10 +312,9 @@ A titolo esemplificativo possono essere incluse le schede tecniche dei component
 %----------------------------------------------------------------------------------------
 %	RIFERIMENTI BIBLIOGRAFICI
 %----------------------------------------------------------------------------------------
-\addcontentsline{toc}{section}{Riferimenti bibliografici}
-\begin{thebibliography}
-EElencare i riferimenti bibliografici citati nel testo. 
-\end{thebibliography}
+
+\bibliography{relazione}
+\bibliographystyle{unsrt}
 
 %----------------------------------------------------------------------------------------
 
