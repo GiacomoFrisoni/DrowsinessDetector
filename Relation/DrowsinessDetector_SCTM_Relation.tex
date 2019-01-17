@@ -121,6 +121,36 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 
 \section{Analisi dei requisiti}
 
+In questa sezione vengono trattati in modo dettagliato tutti i requisiti del progetto.
+
+\begin{itemize}
+	\item lo scopo generale del sistema è quello di riconoscere il grado di sonnolenza di un conducente di una macchina,
+	\item per attivare/disattivare il dispositivo verrà messo a disposizione un bottone,
+	\item per cominciare la rilevazione e l'eventuale segnalazione, il conducente deve preoccuparsi di far partire il rilevamento,
+	\item i dati verranno catturati attraverso un dispositivo di cattura video a colori (una webcam),
+	\item quest'ultimi verranno elaborati attraverso una piattaforma mobile a basso costo (Raspberry Pi 3 B+),
+	\item non ci sono particolari vincoli sui linguaggi di programmazione utilizzati o sul hardware / software legacy da supportare, se non diversi dai limiti imposti dalla piattaforma stessa,
+	\item per essere realizzabile e replicabile, il progetto deve mantenere un costo basso per tutti i componenti, utilizzati e garantire performance in real-time il più possibile accurate, con piccoli margini di errore,
+	\item l'analisi dei dati consisterà nell'individuazione del volto del conducente tramite uno dei metodi noti in letteratura (HOG, HAAR, Linear SVM),
+	\item gli algoritmi per l'individuazione del volto verranno testati e configurati, al fine di selezionare quello con migliori performance, dati i limiti della piattaforma mobile scelta,
+	\item individuato il volto, si procederà alla corretta interpretazione della posizione degli occhi (facial lendmark) e il controllo dell'apertura degli occhi,
+	\item la rilevazione degli occhi, e di conseguenza l'eventuale avviso, scatterà soltanto se il volto è correttamente riconosciuto,
+	\item non vi sarà nessun avviso nel caso in cui il volto non verrà più correttamente riconosciuto, per eliminare falsi positivi dovuti, ad esempio, al conducente girato per fare retromarcia,
+	\item soltanto se entrambi gli occhi risulteranno essere chiusi il conducente verrà allertato dal sistema,
+	\item si prevedono due tipi di avvertimento: uno acustico (tramite buzzer) e uno luminoso (tramite LED),
+	\item il sistema dev'essere robusto ad eventuali variazioni dell'ambiente, della luce e del posizionamento del volto,
+	\item ove possibile, l'oggettistica o gli indumenti indossati non devono compromettere il corretto funzionamento del sistema,
+	\item l'intera soluzione dev'essere facile da trasportare e poco ingombrande, per permettere un'installazione semplificata dentro il veicolo.
+\end{itemize}
+
+\iffalse
+Il sistema progettato  dev'essere in grado di riconoscere il grado di sonnolenza di un conducente di una macchina. I dati provenienti da un dispositivo di cattura video a colori (una webcam) verranno elaborati attraverso una piattaforma mobile a basso costo (Raspberry Pi 3 B+). Non ci sono vincoli riguardanti librerie o linguaggi da utilizzare, come non ci sono vincoli sul hardware / software legacy da supportare. Comunque, per essere realizzabile e replicabile in grande scala, il progetto deve mantenere un costo basso per tutti i componenti utilizzati, ma deve garantire anche performance real-time il più possibile accurate, con piccoli margini di errore.\\
+
+L'analisi dei dati consisterà nell'individuazione del volto del conducente tramite uno dei metodi noti in letteratura (HOG, HAAR, Linear SVM) opportunamente testati e configurati. L'algoritmo con risultati più soddisfacenti permetterà, successivamente, la corretta interpretazione della posizione degli occhi (facial lendmark) e il controllo dell'apertura degli occhi. Nel caso della rilevazione della chiusura di entrambi gli occhi, il conducente verrà allertato del pericolo tramite un segnale acustico e/o luminoso.\\
+
+Il sistema dev'essere robusto alle eventuali variazioni dell'ambiente, quali luce o posizionamento del volto. Eventuale oggettistica indossata o il colore della pelle non deve causare problemi sulla corretta rilevazione. Quest'ultima inizierà e potrà essere interrotta tramite un bottone di accensione / spegnimento e partirà soltanto quando il volto del conducente sarà stato correttamente individuato. Il progetto, nell'insieme, dev'essere facile da trasportare e poco ingombrande, per permettere un'installazione semplificata dentro il veicolo.\\
+
+
 In questa sezione esporre brevemente i requisiti a cui il sistema proposto deve rispondere, concentrando l'attenzione sugli aspetti più rilevanti e facendo eventualmente uso di opportuni diagrammi di alto livello.\\
 
 Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nelle immagini, schemi):
@@ -134,6 +164,7 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
  3 componenti & 8000 & 10000 \\
  \hline
 \end{tabular}
+\fi
 
 
 \newpage
