@@ -9,6 +9,21 @@
 \usepackage{float}
 \usepackage[italian]{babel}
 
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%libreria per il disegno di curve 2D
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%libreria per l'uso del multiriga nelle tabelle
+\usepackage{multirow}
+
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%libreria per produrre pagine landscape in un documento principalmente portrait
+\usepackage{pdflscape}
+
+\usepackage{adjustbox}
+
 \usepackage{subcaption}
 
 %
@@ -156,7 +171,7 @@ Il principale limite legato all'uso di tecniche di Computer Vision per l'estrazi
 \end{figure}
 
 \subsection{Confronto col progetto presentato}
-Il progetto analizzato in questa relazione realizza il rilevamento della sonnolenza attraverso una misura comportamentale incentrata sulla chiusura degli occhi del conducente. Si basa pertanto su tecniche di Computer Vision sia per la \quotes{face detection} che per l'estrazione dei \quotes{facial landmark}. L'apertura degli occhi è calcolata mediante l'EAR, una soluzione diffusa in letteratura (come alternativa al PERCLOS) e nota per i suoi vantaggi: stima incentrata su una sola grandezza scalare, superamento dei risultati allo stato dell'arte su due dataset standard, e ricavabile attraverso una semplice formula da una sola immagine. L'adozione del Raspberry Pi 3 B come piattaforma hardware di riferimento vincola in misura maggiore rispetto alle soluzioni presentate l'applicabilità di algoritmi di visione, costringendo a considerare con massimo riguardo il trade-off tra accuratezza e velocità d'elaborazione (real-time per requisito).
+Il progetto analizzato in questa relazione realizza il rilevamento della sonnolenza attraverso una misura comportamentale incentrata sulla chiusura degli occhi del conducente. Si basa pertanto su tecniche di Computer Vision sia per la \textit{face detection} che per l'estrazione dei \textit{facial landmark}. L'apertura degli occhi è calcolata mediante l'EAR, una soluzione diffusa in letteratura (come alternativa al PERCLOS) e nota per i suoi vantaggi: stima incentrata su una sola grandezza scalare, superamento dei risultati allo stato dell'arte su due dataset standard, e ricavabile attraverso una semplice formula da una sola immagine. L'adozione del Raspberry Pi 3 B come piattaforma hardware di riferimento vincola in misura maggiore rispetto alle soluzioni presentate l'applicabilità di algoritmi di visione, costringendo a considerare con massimo riguardo il trade-off tra accuratezza e velocità d'elaborazione (real-time per requisito).
 
 \iffalse
 Riassumere le soluzioni presenti in letteratura inerenti al problema in esame. Per ciascuna, discutere le principali diversità o affinità rispetto al progetto presentato. Nel caso non siano presenti soluzioni direttamente comparabili a quella presentata descrivere comunque le principali tecniche note per affrontare la tematica trattata.\\
@@ -184,6 +199,7 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 %----------------------------------------------------------------------------------------
 
 \section{Analisi dei requisiti}
+\label{sec:requisiti}
 
 In questa sezione sono trattati in modo dettagliato tutti i requisiti del progetto, emersi durante la fase di analisi.
 
@@ -281,6 +297,70 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 
 \section{Progettazione}
 
+In questa sezione sono esposte le scelte progettuali operate nelle varie fasi di sviluppo dell'elaborato.
+
+\subsection{Metodologia}
+
+La metodologia alla base del progetto si compone di tre parti fondamentali: (1) rilevamento del volto (\textit{face detection}), (2) rilevamento dei punti di riferimento facciali (\textit{facial landmark detection}) e (3) rilevamento della sonnolenza. Ciascuno di questi problemi può essere affrontato con diversi approcci risolutori noti in letteratura. Dal momento che ogni tecnica possiede sia aspetti positivi che negativi, la scelta di quale adottare per il problema di riferimento deve essere frutto di un'attenta analisi in funzione dei requisiti che si devono soddisfare (già evidenziati nella sezione \ref{sec:requisiti}). La valutazione e lo studio delle soluzioni che possono essere intraprese nelle fasi metodologiche costituiscono pertanto due elementi chiave per una valida progettazione. Esse assumono inoltre un ruolo preponderante nella determinazione del successo o del fallimento degli obiettivi stabiliti dall'elaborato stesso. Nei successivi paragrafi si discutono in maggior dettaglio le problematiche emerse sul piano progettuale e si giustificano le scelte intraprese.
+
+\subsubsection{Rilevamento del volto}
+
+Rilevare la presenza del volto del conducente e localizzarne la posizione all'interno di un'immagine rappresenta un'operazione centrale in tutti i progetti di \textit{drowsiness detection} basati su misure comportamentali e, quindi, algoritmi principalmente connessi alla Computer Vision. I localizzatori allo stato dell'arte più utilizzati in letteratura sono di seguito riportati, classificandoli nelle due principali famiglie con cui possono essere distinti.
+\begin{itemize}
+	\item \textbf{Tecniche feature-based}. Usano esplicitamente la conoscenza dell'aspetto del volto, caratterizzato da un insieme di feature di basso livello: proprietà dei pixel, informazioni sulla geometria del volto e modelli standard definiti manualmente o descritti da funzioni (\textit{template matching}).
+	\item \textbf{Tecniche image-based}. Affrontano il problema della localizzazione del volto come un generico problema di pattern recognition dove l'obiettivo è imparare a riconoscere l'immagine di un viso sulla base di alcuni esempi di training.
+	\begin{itemize}
+		\item \textbf{Haar Cascade Classifier.}\\
+		È una tecnica di Machine Learning proposta da Paul Viola e Michael Jones nel 2001\cite{X}, introdotta per la localizzazione di oggetti e applicata poi con successo all'individuazione di volti. Il localizzatore di Viola e Jones, nello specifico, è uno dei più robusti ed efficienti allo stato dell'arte. La procedura d'individuazione del volto, infatti, consente un funzionamento real-time. Tuttavia l'addestramento è molto lento (può richiedere giorni) e necessita di numerose istanze sia di esempi positivi che negativi.
+		Internamente utilizza un classificatore in grado di associare un pattern in input a una delle due classi volto e non volto. Ciò è possibile poichè le immagini contenenti volti hanno proprietà comuni, mentre quelle che non li rappresentano sono estremamente irregolari.
+		\begin{itemize}
+			\item \textbf{Haar-like feature.}\\
+			La localizzazione dei volti avviene analizzando sottofinestre consecutive (sovrapposte e di dimensione variabile) dell'immagine in input, estraendo le feature presenti nella finestra e classificando la finestra stessa come volto o non volto. Le feature Haar-like sono caratterizzate dall'applicazione di regioni rettangolari di colorazione bianca e nera unite tra loro, come mostrato in Figura \ref{Y}. Ogni feature è posizionata in una sottoregione di una sottofinestra dell'immagine e il suo valore è calcolato come somma pesata di due componenti: la somma dei pixel nella regione nera e la somma di quelli interni alla ragione bianca. I segni dei due pesi sono opposti e i loro valori assoluti sono inversamente proporzionali alle aree delle rispettive regioni, in modo da effettuare un calcolo normalizzato. Le feature Haar-like, inoltre, sono applicate modificandone la dimensione, la forma e la posizione nella sottofinestra. Il motivo legato al loro uso è da ricercarsi nella loro efficacia ai fini della localizzazione del volto e nell'efficienza con cui possono essere calcolate mediante l'impiego dell'immagine integrale. Nonostante la rapidità con cui è possibile individuarle, occorre osservare come a ogni sottofinestra possano nella pratica corrispondere diverse miliaia di feature associate.
+			\item \textbf{Immagine integrale.}\\
+			Le semplici feature rettangolari di un'immagine sono calcolate utilizzando una rappresentazione intermedia dell'immagine stessa, chiamata immagine integrale. L'immagine integrale in posizione (x,y) corrisponde alla somma del valore dei pixel sopra e a sinistra di (x,y).
+			\item \textbf{AdaBoost.}\\
+			AdaBoost è una tecnica di addestramento che ha l'obiettivo di costruire un classificatore non lineare complesso e robusto come combinazione lineare di M classificatori più semplici detti classificatori deboli, apprendendo la loro sequenza ottimale e i corrispondenti pesi in modo da minimizzare l'upper bound all'errore di classificazione.
+			\item \textbf{Classificatore a cascata.}\\
+			Un solo classificatore robusto, per quanto elimini una grande porzione di sottofinestre che non contengono volti (grazie alla sua caratteristica di essere non lineare), non soddisfa i requisiti di applicazioni in termini d'efficienza e di percentuale ridotta di falsi allarmi. Una possibile soluzione consiste nell'impiego di classificatori robusti in cascata, a complessità crescente. Ogni stage del classificatore a cascata mostra la regione definita dalla locazione corrente della finestra scorrevole come positiva (se il volto è stato trovato) o negativa (se il volto non è stato trovato). Se l'etichetta è negativa, la classificazione di quella regione è completa e la finestra scorrevole viene spostata sulla locazione successiva. Se invece l'etichetta è positiva, il classificatore passa la regione allo stage successivo. L'intero classificatore a cascata riporta il volto come individuato nella locazione della finestra scorrevole solo se l'ultimo stage giunge a classificare la regione come positiva. Tale approccio è usato per eliminare velocemente regioni meno probabili in modo da non richiedere elaborazione ulteriore quando non necessario.
+		\end{itemize}
+		\item \textbf{LBP Cascade Classifier.}\\
+		LBP\footnote{LBP. Local Binary Patterns.} è un classificatore che, come Haar, necessita di essere addestrato con centinaia di immagini. Ogni immagine di training è divisa in blocchi e per ogni blocco LBP adotta una finestra di 9 pixel (3x3), osservando con un particolare interesse il pixel collocato centralmente. Successivamente l'algoritmo compara il valore del pixel centrale con quello di ogni vicino all'interno della finestra 3x3. Ciascun pixel vicino con valore maggiore o uguale a quello del pixel centrale viene posto a 1, mentre i rimanenti a 0. Successivamente, i valori dei pixel aggiornati vengono letti in ordine orario, formando un numero binario. Tale numero binario viene poi convertito in notazione decimale e assegnato come nuovo valore del pixel centrale. L'operazione viene poi ripetuta per ogni pixel nel blocco. Infine, ogni valore contenuto in un blocco viene convertito in un istogramma. Concatenando gli istogrammi di ogni blocco si giunge a formare il vettore di feature per l'immagine.
+		\item \textbf{HOG.}
+	\end{itemize}
+\end{itemize}
+
+\subsubsection{Rilevamento dei punti di riferimento facciali}
+
+\subsubsection{Rilevamento della sonnolenza}
+
+\subsection{Architettura software}
+
+\subsubsection{Flowchart dell'algoritmo}
+
+\subsection{Architettura fisica}
+
+\iffalse
+
+- flowchart
+- face detection
+	- Viola-Jones
+	- LBP
+	- HOG
+	- perchè non Deep Learning / CNN e LGBP
+	- input del modello per il rilevamento del volto
+- facial landmark detection
+- EAR
+	- perchè non PERCLOS
+	- perchè non template matching
+	- importanza blink detection
+	- eye blinking (tempi e osservazioni)
+	- EAR threshold
+	- EAR SVM
+	- EAR con HMM
+	- perchè usare EAR con threshold
+	- numero di frame consecutivi
+- circuito fritzing
+
 Devono essere esposte le scelte progettuali operate nelle varie fasi di sviluppo dell'elaborato.\\
 
 In questa sezione devono essere documentati gli schemi di progetto relativamente all'architettura complessiva del sistema e alle sue componenti di rilievo che possano meritare un'analisi di dettaglio. Per le componenti software si può ricorrere ad esempio a diagrammi delle classi, di sequenza, stato, attività. Per le componenti hardware è possibile includere opportuni schemi in grado di descrivere l'architettura fisica adottata.\\
@@ -296,7 +376,7 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
  3 componenti & 15000 & 24000 \\
  \hline
 \end{tabular}
-
+\fi
 
 \newpage
 
@@ -306,6 +386,13 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 %----------------------------------------------------------------------------------------
 
 \section{Implementazione}\label{sec:implementazione}
+
+- OpenCV
+- Python
+- Dlib
+- Imutils
+- Fissaggio camera
+- Script
 
 Esporre i principali problemi affrontati durante l'effettiva realizzazione delle componenti hardware/software e illustrare le soluzioni implementative adottate. Se l'elaborato ha previsto l'utilizzo di tecnologie già disponibili sul mercato, discuterne brevemente le caratteristiche e motivarne l'adozione rispetto ad altre soluzioni assimilabili.\\
 
@@ -334,6 +421,93 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 
 \section{Testing e performance}
 
+\begin{table}[h]
+	\centering
+	\begin{tabular}{cc|c|c|}
+		\cline{3-4}
+		&        & \multicolumn{2}{c|}{Predicted} \\ \cline{3-4} 
+		&        & Alert         & Drowsy         \\ \hline
+		\multicolumn{1}{|c|}{\multirow{2}{*}{Given}} & Alert  & TN & FP\\ \cline{2-4} 
+		\multicolumn{1}{|c|}{}                       & Drowsy & FN & TP\\ \hline
+	\end{tabular}
+	\caption{Matrice di confusione con $EAR_{th}=0.3$}
+	\label{table:cm_0_3}
+\end{table}
+
+\begin{landscape}
+\begin{table}[]
+	\centering
+	\begin{adjustbox}{width=1.4\textwidth}
+	\begin{tabular}{lllllllllllllccllll}
+		& & & & & & & & & & & & & \multicolumn{1}{l}{} & \multicolumn{1}{l}{} & & & &\\ \cline{5-19}
+		& & & \multicolumn{1}{l|}{} & \multicolumn{4}{c|}{Confusion Matrix} & \multicolumn{5}{c|}{Category Statistical Indices} & \multicolumn{3}{c|}{Daytime Statistical Indices} & \multicolumn{3}{c|}{Global Statistical Indices}\\ \hline
+		\multicolumn{4}{|c|}{Category} & \multicolumn{1}{l|}{TP} & \multicolumn{1}{l|}{TN} & \multicolumn{1}{l|}{FP} & \multicolumn{1}{l|}{FN} & \multicolumn{1}{l|}{Accuracy} & \multicolumn{1}{l|}{Precision} & \multicolumn{1}{l|}{MR} & \multicolumn{1}{l|}{TPR} & \multicolumn{1}{l|}{FPR} & \multicolumn{1}{c|}{Accuracy} & \multicolumn{1}{c|}{TPR} & \multicolumn{1}{l|}{FPR} & \multicolumn{1}{l|}{Accuracy} & \multicolumn{1}{l|}{TPR} & \multicolumn{1}{l|}{FPR}\\ \hline
+		\multicolumn{1}{|l|}{\multirow{8}{*}{Day}} & \multicolumn{1}{l|}{\multirow{4}{*}{Drowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{\multirow{16}{*}{}} & \multicolumn{1}{l|}{\multirow{16}{*}{}} & \multicolumn{1}{l|}{\multirow{16}{*}{}}\\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{3-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static}  & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{2-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{\multirow{4}{*}{NoDrowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{3-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{1-16}
+		\multicolumn{1}{|l|}{\multirow{8}{*}{Night}} & \multicolumn{1}{l|}{\multirow{4}{*}{Drowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{3-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{2-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{\multirow{4}{*}{NoDrowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{3-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static}  & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \hline
+		& & & & & & & & & & & & & \multicolumn{1}{l}{} & \multicolumn{1}{l}{} & & & &
+	\end{tabular}
+	\end{adjustbox}
+\caption{Accuratezza del rilevatore di sonnolenza con $EAR_{th}=0.3$}
+\label{table:test}
+\end{table}
+\end{landscape}
+
+\begin{equation}
+Accuracy = \frac{TP + TN}{TP + TN + FP + FN} \times 100
+\end{equation}
+
+\begin{equation}
+Precision = \frac{TP}{TP + FP} \times 100
+\end{equation}
+
+\begin{equation}
+MisclassificationRate = \frac{FP + FN}{TP + TN + FP + FN} \times 100
+\end{equation}
+
+\begin{equation}
+TPR = \frac{TP}{TP + FN} \times 100
+\end{equation}
+
+\begin{equation}
+FPR = \frac{TN}{TN + FP} \times 100
+\end{equation}
+
+\begin{center}
+	\framebox{\begin{tikzpicture}
+		\begin{loglogaxis}[title={\textbf{ROC Curve}}, xlabel=Rate of False Positive (\%), ylabel=Rate of True Positive (\%), scale=1.5]
+		\addplot plot coordinates {
+			(0, 8.312e-02)
+			(10, 2.547e-02)
+			(20, 7.407e-03)
+			(30, 2.102e-03)
+			(40, 5.874e-04)
+			(50, 1.623e-04)
+			(60, 4.442e-05)
+			(70, 1.207e-05)
+			(80, 3.261e-06) };
+		\legend{DrowsinessDetector\\}
+		\end{loglogaxis}
+	\end{tikzpicture}}
+\end{center}
+
+\iffalse
+- orientamento testa
+- distanza minima e massima di funzionamento
+
 Esporre lo stato di funzionamento effettivo del sistema progettato ad elaborato concluso. Per ciascuna delle funzionalità salienti devono essere tabellate e discusse le performance riscontrate mediante opportuni test eseguiti in fase di validazione del progetto.\\
 
 I tempi di esecuzione/comunicazione devono essere accompagnati dalle caratteristiche dell'hardware sul quale è eseguito il software.\\
@@ -352,7 +526,7 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
  3 componenti & 3000 & 6000 \\
  \hline
 \end{tabular}
-
+\fi
 
 \newpage
 
