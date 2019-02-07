@@ -31,6 +31,17 @@
 \newcommand{\quotes}[1]{``#1''}
 
 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%librerie per la visualizzazione del codice
+\usepackage{listings}
+\lstset{
+	language=bash,
+	basicstyle=\ttfamily,
+	frame=tblr,
+}
+
+\usepackage{pythonhighlight}
+
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%libreria per l'inserimento di link nella
 %   bibliografia
 \PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
@@ -70,8 +81,6 @@
 Giacomo Frisoni\\
 Marcin Pabich\\[3cm]
 \end{flushleft}
-
-
 
 \end{titlepage}
 
@@ -533,31 +542,141 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 
 \section{Implementazione}\label{sec:implementazione}
 
-- OpenCV
-- Python
-- Dlib
-- Imutils
-- Fissaggio camera
-- Script
+In questa sezione vengono dimostrate le fasi di configurazione del dispositivo, la realizzazione del circuito elettronico e la scrittura degli script per l'analisi dei video e dei dati ottenuti.
 
-Noi utilizziamo la libreria Dlib a questo scopo, la quale fornisce un \textit{facial landmark detector} già addestrato (basato su HOG e SVM).
+\subsection{Configurazione Dispositivo}
+Prima di essere utilizzato, il Raspberry PI dev'essere opportunamente configurato: non è sufficiente, infatti, alimentarlo o ottenere soltanto un IDE dedicato; esso necessita di un vero e proprio sistema operativo sul quale far affidamento. Solo successivamente, interagendo direttamente con esso, si potranno svolgere tutte le operazioni di progettazione, sviluppo e testing.
 
-Esporre i principali problemi affrontati durante l'effettiva realizzazione delle componenti hardware/software e illustrare le soluzioni implementative adottate. Se l'elaborato ha previsto l'utilizzo di tecnologie già disponibili sul mercato, discuterne brevemente le caratteristiche e motivarne l'adozione rispetto ad altre soluzioni assimilabili.\\
+\subsubsection{Memoria (MicroSD)}
+Tutto il software necessario per il corretto funzionamento del Raspberry dev'essere caricato in una scheda MicroSD, opportunamente tarata per uno specifico progetto in termini di capacità disponibile. La scheda risulta essere facilmente reperibile ad un prezzo contenuto su qualsiasi negozio fisico o virtuale avente a che fare con il mondo di elettronica: per questo motivo si preferisce di lasciare un modesto margine di memoria libera e di ricadere su una capacità di 32GB, ampiamente sufficiente per contenere il sistema operativo, vari IDE per lo sviluppo e l'intero dataset. Il procedimento di configurazione può essere suddiviso in due parti: la prima, tramite un Personal Computer di appoggio e la seconda, direttamente sul dispositivo inizializzato.
 
-\textbf{NOTA: in questa sezione devono essere riportate esclusivamente le porzioni di codice ritenute particolarmente significative. Il codice sorgente nella sua interezza, opportunamente commentato, deve essere consegnato separatamente dalla relazione in un archivio compresso.}\\
+\subsubsection{Installazione Sistema Operativo}
+In questa fase la MicroSD dev'essere connessa al Personal Computer che verrà utilizzato per configurarla: infatti, prima di essere utilizzata direttamente sul Raspberry, la MicroSD dev'essere opportunamente formattata in formato FAT32; per eseguire questa operazione si fa riferimento al software \quotes{SD Memory Card Formatter} (disponibile per Windows e Mac), che in pochi passaggi e poco tempo esegue l'operazione richiesta. Successivamente si provvede alla scelta del Sistema Operativo che il Raspberry metterà in esecuzione. Questa scelta ricade sull'utente e sugli eventuali vincoli da soddisfare: esistono infatti innumerevoli distro Linux disponibili gratuitamente al download e pronte all'utilizzo. Seguendo le linee guida riportate direttamente sul sito del produttore del Raspberry, si sceglie la distribuzione \textbf{Raspbian}: essa risulta essere basata su Debian, opportunamente ottimizzato per funzionare sul Raspberry. Il caricamento di quest'ultimo può avvenire in due modi: attraverso l'operazione di \quotes{flash} del sistema operativo direttamente sulla MicroSD, oppure tramite un installer (chiamato NOOBS, \textit{New Out Of the Box Software}). Per facilità di installazione, si preferisce la seconda: dopo l'ottenimento dell'archivio \textit{.zip} dal sito ufficiale, si estrae il suo contenuto direttamente dentro la MicroSD formattata in precedenza. Così facendo, il dispositivo potrà avviare una modalità d'installazione, nella quale scegliere, successivamente, tutti i componenti aggiuntivi da installare al sistema operativo. Soltanto adesso la MicroSD può essere rimossa dal computer e inserita dentro il Raspberry nell'apposito slot.\\
+
+Per procedere nei successivi passi di configurazione si ha necessità di alcune periferiche input/output connesse direttamente al Raspberry: una tastiera, un mouse e un monitor con entrata HDMI, nonchè un cavo HDMI per collegare il device al monitor e l'alimentatore per il Raspberry (5V, 2.1A). Si collega l'alimentatore nell'apposito ingresso MicroUSB, facendo partire l'installazione guidata. Tramite mouse e tastiera si selezionano le preferenze riguardanti il software da installare, che in questo caso risulta essere soltanto il sistema operativo completo di alcuni tool e programmi preinstallati. Completata la procedura d'installazione, il device è pronto all'utilizzo e si può procedere alla seconda fase di configurazione.
+
+\subsubsection{Installazione Software e Librerie}
+Il computer utilizzato nella prima fase della configurazione può essere ora spento, dato che il Raspberry risulta essere ora, a tutti gli effetti, un completo computer con un browser, accesso a internet (previa connessione via WiFi o Ethernet) e diversi software per lo sviluppo. Gli strumenti forniti di default non sono comunque sufficienti ai fini del progetto, per cui si procede alla manuale configurazione e installazione dei vari software / pacchetti / librerie / tool per permettere e facilitare il successivo sviluppo. Gli strumenti illustrati successivamente devono essere necessariamente installati nell'ordine in cui appaiono, altrimenti vi è il rischio che non ci siano dipendenze sufficienti.\\
+
+Prima di procedere con qualsiasi modifica, è buona norma assicurarsi che il pacchetto per l'ottenimento del software aggiuntivo sia aggiornato. Si eseguono due comandi per effettuare la verifica:
+\begin{lstlisting}
+sudo apt-get update
+sudo apt-get upgrade
+\end{lstlisting}
+
+L'unico software aggiunto al sistema operativo è \textbf{Visual Studio Code}: il programma si presenta come un editor testuale, con supporto a diversi linguaggi e script; abilita l'highlight del codice e un discreto aiuto con suggerimenti durante la fase di immissione testo, per quanto riguarda nomi variabili, metodi ecc... Verrà installato sotto il nome di "inserire il nome qui" e si ottiene utilizzando la console, tramite due comandi:
+
+\begin{lstlisting}
+wget https://packagecloud.io/headmelted/codebuilds/gpgkey 
+-O - | sudo apt-key add -
+\end{lstlisting}
+
+\begin{lstlisting}
+curl -L https://code.headmelted.com/installers/apt.sh
+| sudo bash
+\end{lstlisting}
+
+Successivamente si procede all'installazione della libreria \textbf{OpenCV}, discussa nel capitolo "inserire il capitolo qui". Per funzionare correttamente e in modo ottimizzato sul Raspberry esiste una versione ad hoc, pensata per i dispositivi con poca capacità di calcolo. Per poterla eseguire è necessario però installare alcune dipendenze, quali \textit{libhdf5-dev}, \textit{libhdf5-serial-dev}, \textit{libqtwebkit4} e \textit{libqt4-test}, il package manager di Python e il gestore degli ambienti virtuali di Python. Le \textbf{dipendenze} sono facilmente ottenibili tramite l'esecuzione di pochi comandi:
+	
+\begin{lstlisting}
+sudo apt-get install libhdf5-dev libhdf5-serial-dev
+sudo apt-get install libqtwebkit4 libqt4-test
+\end{lstlisting}
+
+Lo stesso discorso vale per il Package Manager di Python \textbf{(PIP)}. Esso si ottiene mediante i comandi:
+
+\begin{lstlisting}
+wget https://bootstrap.pypa.io/get-pip.py
+sudo python3 get-pip.py
+\end{lstlisting}
+			
+Per poter lavorare comodamente con diversi progetti che richiedono diverse librerie, è preferibile utilizzare ambienti virtuali. Essi sono facilmente intercambiabili e permettono di evitare conflitti di librerie nel caso in cui si vuole gestire più progetti Python in un unico device. Utilizzando \textit{PIP} si può facilmente ottenere il \textbf{Gestore degli Ambienti Virtuali}:
+\begin{lstlisting}
+pip install virtualenv virtualenvwrapper
+\end{lstlisting}	
+			
+Per utilizzare i comandi resi disponibili dal precedente pacchetto, occorre modificare il file \textit{~/.profile}: si può utilizzare un editor di testo a piacere (vim, nano o qualsiasi tool grafico) per inserire alla fine di questo file le seguenti righe:
+
+\begin{lstlisting}
+# virtualenv and virtualenvwrapper
+export WORKON_HOME=$HOME/.virtualenvs
+export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
+source /usr/local/bin/virtualenvwrapper.sh
+\end{lstlisting}
+
+I comandi sono pronti ora all'utilizzo, ma ogni tal volta in cui si apre una nuova finestra console è necessario eseguire il seguente comando per far riconoscere come validi i comandi per la gestione degli ambienti virtuali:
+
+\begin{lstlisting}
+source ~/.profile
+\end{lstlisting}
+
+La creazione di un ambiente virtuale avviene a liena di comando. Per creare un nuovo ambiente virtuale di nome \quotes{cv} si esegue il seguente comando:
+\begin{lstlisting}
+mkvirtualenv cv -p python3
+\end{lstlisting}
+
+Successivamente, per impostarlo come attuale ambiente sul quale si sta lavorando, si esegue:
+\begin{lstlisting}
+workon cv
+\end{lstlisting}
+
+Soltanto ora è possibile installare ulteriori dipendenze senza che quest'ultime possano mai andare in conflitto tra diversi progetti eventualmente gestiti. Trovandosi ora in un ambiente virtuale chiuso, tutte le librerie installate da ora in poi saranno visibili esclusivamente nell'ambiente chiamato \quotes{cv}. Si procede dunque all'installazione di \textbf(OpenCV) per Python:
+\begin{lstlisting}
+pip install opencv-contrib-python
+\end{lstlisting}
+
+Ci sono diverse classi di appoggio sulle quali si possono effettuare operazioni di elaborazione di immagini. Si preferisce l'utilizzo della libreria \textit{imutils}, ricca di funzionalità e di facile utilizzo. La procedura d'installazione è la classica e prevede l'esecuzione del comando:
+\begin{lstlisting}
+pip install imutils
+\end{lstlisting}
+
+Infine, per poter utilizzare la RaspiCam direttamente in Python si utilizzerà una libreria di appoggio, installata tramite il seguente comando:
+\begin{lstlisting}
+pip install "picamera[array]"
+\end{lstlisting}
+
+Prima di procedere al vero e proprio sviluppo del progetto, viene consigliato di testare le librerie appena installate. Senza chiudere la finestra precedentemente aperta (oppure aprendone una nuova e rieseguendo i comandi per il cambio dell'ambiente virtuale)  si possono eseguire in ordine i comandi:
+\begin{python}
+python
+import cv2
+import imutils
+\end{python}
+
+Se tutto funziona correttamente e non vengono restituiti errori di nessun genere, si può procedere allo sviluppo e utilizzo completo delle librerie. Nel caso in cui i comandi di sopra producessero errori, si può procedere all'integrazione di alcune librerie probabilmente mancanti oppure provare a reinstallarle tutte dall'inizio su un nuovo ambiente virtuale, facendo molta attenzione all'ordine e all'effettivo completamento dell'installazione dei singoli pacchetti senza alcun genere di errore in output. Le eventuali librerie da aggiungere, nel caso di problemi, devono essere installati fuori dall'ambiente virtuale: è sufficiente aprire una nuova finestra di console ed eseguire uno ad uno i seguenti comandi:
+\begin{lstlisting}
+sudo apt-get install libatlas-base-dev
+sudo apt-get install libjasper-dev
+sudo apt-get install libqtgui4
+sudo apt-get install python3-pyqt5
+\end{lstlisting}
 
 
-Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nelle immagini, schemi):
 
-\vspace{1cm}
-\begin{tabular}{l|rr}
- & Numero minimo di battute & Numero massimo di battute \\
- \hline
- 1 componente & 5000 & 11000 \\
- 2 componenti & 8000 & 16000 \\
- 3 componenti & 10000 & 21000 \\
- \hline
-\end{tabular}
+%- OpenCV
+%- Python
+%- Dlib
+%- Imutils
+%- Fissaggio camera
+%- Script
+
+%Noi utilizziamo la libreria Dlib a questo scopo, la quale fornisce un \textit{facial landmark detector} già addestrato (basato su HOG e SVM).
+
+%Esporre i principali problemi affrontati durante l'effettiva realizzazione delle componenti hardware/software e illustrare le soluzioni implementative adottate. Se l'elaborato ha previsto l'utilizzo di tecnologie già disponibili sul mercato, discuterne brevemente le caratteristiche e motivarne l'adozione rispetto ad altre soluzioni assimilabili.\\
+
+%\textbf{NOTA: in questa sezione devono essere riportate esclusivamente le porzioni di codice ritenute particolarmente significative. Il codice sorgente nella sua interezza, opportunamente commentato, deve essere consegnato separatamente dalla relazione in un archivio compresso.}\\
+
+
+%Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nelle immagini, schemi):
+
+%\vspace{1cm}
+%\begin{tabular}{l|rr}
+% & Numero minimo di battute & Numero massimo di battute \\
+% \hline
+% 1 componente & 5000 & 11000 \\
+% 2 componenti & 8000 & 16000 \\
+% 3 componenti & 10000 & 21000 \\
+% \hline
+%\end{tabular}
 
 
 \newpage
@@ -590,22 +709,22 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 		& & & & & & & & & & & & & \multicolumn{1}{l}{} & \multicolumn{1}{l}{} & & & &\\ \cline{5-19}
 		& & & \multicolumn{1}{l|}{} & \multicolumn{4}{c|}{Confusion Matrix} & \multicolumn{5}{c|}{Category Statistical Indices} & \multicolumn{3}{c|}{Daytime Statistical Indices} & \multicolumn{3}{c|}{Global Statistical Indices}\\ \hline
 		\multicolumn{4}{|c|}{Category} & \multicolumn{1}{l|}{TP} & \multicolumn{1}{l|}{TN} & \multicolumn{1}{l|}{FP} & \multicolumn{1}{l|}{FN} & \multicolumn{1}{l|}{Accuracy} & \multicolumn{1}{l|}{Precision} & \multicolumn{1}{l|}{MR} & \multicolumn{1}{l|}{TPR} & \multicolumn{1}{l|}{FPR} & \multicolumn{1}{c|}{Accuracy} & \multicolumn{1}{c|}{TPR} & \multicolumn{1}{l|}{FPR} & \multicolumn{1}{l|}{Accuracy} & \multicolumn{1}{l|}{TPR} & \multicolumn{1}{l|}{FPR}\\ \hline
-		\multicolumn{1}{|l|}{\multirow{8}{*}{Day}} & \multicolumn{1}{l|}{\multirow{4}{*}{Drowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{\multirow{16}{*}{}} & \multicolumn{1}{l|}{\multirow{16}{*}{}} & \multicolumn{1}{l|}{\multirow{16}{*}{}}\\ \cline{4-13}
-		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{3-13}
-		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static}  & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{4-13}
-		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{2-13}
-		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{\multirow{4}{*}{NoDrowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{4-13}
-		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{3-13}
-		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
-		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{1-16}
-		\multicolumn{1}{|l|}{\multirow{8}{*}{Night}} & \multicolumn{1}{l|}{\multirow{4}{*}{Drowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
-		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{3-13}
-		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
-		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{2-13}
-		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{\multirow{4}{*}{NoDrowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
-		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{3-13}
-		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static}  & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
-		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \hline
+		\multicolumn{1}{|l|}{\multirow{8}{*}{Day}} & \multicolumn{1}{l|}{\multirow{4}{*}{Drowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{372} & \multicolumn{1}{l|}{2005} & \multicolumn{1}{l|}{501} & \multicolumn{1}{l|}{702} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{\multirow{16}{*}{}} & \multicolumn{1}{l|}{\multirow{16}{*}{}} & \multicolumn{1}{l|}{\multirow{16}{*}{}}\\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{163} & \multicolumn{1}{l|}{1870} & \multicolumn{1}{l|}{78} & \multicolumn{1}{l|}{574} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{3-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static}  & \multicolumn{1}{l|}{1409} & \multicolumn{1}{l|}{3141} & \multicolumn{1}{l|}{357} & \multicolumn{1}{l|}{463} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{991} & \multicolumn{1}{l|}{2319} & \multicolumn{1}{l|}{43} & \multicolumn{1}{l|}{227} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{2-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{\multirow{4}{*}{NoDrowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{2390} & \multicolumn{1}{l|}{295} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{1749} & \multicolumn{1}{l|}{41} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{3-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{2633} & \multicolumn{1}{l|}{52} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{2590} & \multicolumn{1}{l|}{95} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{1-16}
+		\multicolumn{1}{|l|}{\multirow{8}{*}{Night}} & \multicolumn{1}{l|}{\multirow{4}{*}{Drowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{327} & \multicolumn{1}{l|}{1015} & \multicolumn{1}{l|}{186} & \multicolumn{1}{l|}{262} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{103} & \multicolumn{1}{l|}{392} & \multicolumn{1}{l|}{978} & \multicolumn{1}{l|}{317} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{3-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{259} & \multicolumn{1}{l|}{1376} & \multicolumn{1}{l|}{160} & \multicolumn{1}{l|}{890} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{314} & \multicolumn{1}{l|}{1447} & \multicolumn{1}{l|}{294} & \multicolumn{1}{l|}{630} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{2-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{\multirow{4}{*}{NoDrowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{1330} & \multicolumn{1}{l|}{460} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{655} & \multicolumn{1}{l|}{1135} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{3-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static}  & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{1542} & \multicolumn{1}{l|}{248} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{1207} & \multicolumn{1}{l|}{583} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \hline
 		& & & & & & & & & & & & & \multicolumn{1}{l}{} & \multicolumn{1}{l}{} & & & &
 	\end{tabular}
 	\end{adjustbox}
