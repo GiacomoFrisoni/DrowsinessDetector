@@ -166,6 +166,12 @@ Il principale limite legato all'uso di tecniche di Computer Vision per l'estrazi
 		\includegraphics[width=.8\linewidth]{eps/ear.eps}
 		\caption{Misure comportamentale incentrate sulla chiusura degli occhi calcolata con tecniche di Computer Vision.}
 	\end{subfigure}
+	\par\bigskip % force a bit of vertical whitespace
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[width=.5\linewidth]{eps/volkswagen_alert.eps}
+		\caption{Avviso di sonnolenza all'interno dei veicoli Volkswagen\cite{Volkswagen}.}
+	\end{subfigure}
 	\caption{Esempi di soluzioni per il rilevamento della sonnolenza alla guida, con distinzione nella misura adottata.}
 	\label{fig:StateOfTheArt}
 \end{figure}
@@ -267,8 +273,10 @@ In questa sezione sono trattati in modo dettagliato tutti i requisiti del proget
 
 \subsection{Implementation Requirements}
 \begin{enumerate}
-	\item \textbf{Raspberry Pi 3 B}. La componente hardware del sistema deve essere basata su Raspberry Pi 3 B, un single-board computer economico, di ridotte dimensioni e di buone capacità computazionali. La ragione alla base di tale scelta è da ricercarsi nella volontà di approfondire le conoscenze apprese durante il corso di Smart City e Tecnologie Mobili, acquisendo anche esperienza nello sviluppo di progetti basati su questo tipo di piattaforma.
-	\item \textbf{Budget}. La realizzazione del sistema deve avvenire a basso costo da un punto di vista economico in tutte le sue componenti, nell'ottica anche di un ipotetico deployment su larga scala.
+	\item \textbf{Raspberry Pi 3 B.} La componente hardware del sistema deve essere basata su Raspberry Pi 3 B, un single-board computer economico, di ridotte dimensioni e di buone capacità computazionali. La ragione alla base di tale scelta è da ricercarsi nella volontà di approfondire le conoscenze apprese durante il corso di Smart City e Tecnologie Mobili, acquisendo anche esperienza nello sviluppo di progetti basati su questo tipo di piattaforma. Inoltre la scelta legata all'impiego di tale dispositivo è stata operata in funzione delle disponibilità in termini di risorse del laboratorio universitario.
+	\item \textbf{RaspiCam v 1.3.} La cattura dei video raffiguranti l'utente alla guida deve essere realizzata mediante la versione 1.3 di RaspiCam (modulo di camera ufficiale per Raspberry Pi). La scelta legata all'uso di tale hardware, analogamente al caso di Raspberry Pi 3 B, è stata realizzata a fronte della visione del materiale disponibile per gli studenti del corso.
+	\item \textbf{Budget.} La realizzazione del sistema deve avvenire a basso costo da un punto di vista economico in tutte le sue componenti, nell'ottica anche di un ipotetico deployment su larga scala.
+	\item \textbf{Tempi di sviluppo.} Il completamento del progetto deve avvenire considerando un monte ore di lavoro complessivo pari a 100 per ogni studente.
 \end{enumerate}
 
 \iffalse
@@ -305,39 +313,177 @@ La metodologia alla base del progetto si compone di tre parti fondamentali: (1) 
 
 \subsubsection{Rilevamento del volto}
 
-Rilevare la presenza del volto del conducente e localizzarne la posizione all'interno di un'immagine rappresenta un'operazione centrale in tutti i progetti di \textit{drowsiness detection} basati su misure comportamentali e, quindi, algoritmi principalmente connessi alla Computer Vision. I localizzatori allo stato dell'arte più utilizzati in letteratura sono di seguito riportati, classificandoli nelle due principali famiglie con cui possono essere distinti.
+Rilevare la presenza del volto del conducente e localizzarne la posizione all'interno di un'immagine rappresenta un'operazione centrale in tutti i progetti di \textit{drowsiness detection} basati su misure comportamentali e, quindi, algoritmi principalmente connessi alla Computer Vision. I localizzatori allo stato dell'arte più utilizzati in letteratura e considerati d'interesse ai fini del progetto sono di seguito riportati, classificandoli nelle due principali famiglie con cui possono essere distinti.
 \begin{itemize}
 	\item \textbf{Tecniche feature-based}. Usano esplicitamente la conoscenza dell'aspetto del volto, caratterizzato da un insieme di feature di basso livello: proprietà dei pixel, informazioni sulla geometria del volto e modelli standard definiti manualmente o descritti da funzioni (\textit{template matching}).
 	\item \textbf{Tecniche image-based}. Affrontano il problema della localizzazione del volto come un generico problema di pattern recognition dove l'obiettivo è imparare a riconoscere l'immagine di un viso sulla base di alcuni esempi di training.
 	\begin{itemize}
 		\item \textbf{Haar Cascade Classifier.}\\
-		È una tecnica di Machine Learning proposta da Paul Viola e Michael Jones nel 2001\cite{X}, introdotta per la localizzazione di oggetti e applicata poi con successo all'individuazione di volti. Il localizzatore di Viola e Jones, nello specifico, è uno dei più robusti ed efficienti allo stato dell'arte. La procedura d'individuazione del volto, infatti, consente un funzionamento real-time. Tuttavia l'addestramento è molto lento (può richiedere giorni) e necessita di numerose istanze sia di esempi positivi che negativi.
+		È una tecnica di Machine Learning proposta da Paul Viola e Michael Jones nel 2001\cite{Haar}, introdotta per la localizzazione di oggetti e applicata poi con successo all'individuazione di volti. Il localizzatore di Viola e Jones, nello specifico, è uno dei più robusti ed efficienti allo stato dell'arte. La procedura d'individuazione del volto, infatti, consente un funzionamento real-time. Tuttavia l'addestramento è molto lento (può richiedere giorni) e necessita di numerose istanze sia di esempi positivi che negativi.
 		Internamente utilizza un classificatore in grado di associare un pattern in input a una delle due classi volto e non volto. Ciò è possibile poichè le immagini contenenti volti hanno proprietà comuni, mentre quelle che non li rappresentano sono estremamente irregolari.
 		\begin{itemize}
 			\item \textbf{Haar-like feature.}\\
-			La localizzazione dei volti avviene analizzando sottofinestre consecutive (sovrapposte e di dimensione variabile) dell'immagine in input, estraendo le feature presenti nella finestra e classificando la finestra stessa come volto o non volto. Le feature Haar-like sono caratterizzate dall'applicazione di regioni rettangolari di colorazione bianca e nera unite tra loro, come mostrato in Figura \ref{Y}. Ogni feature è posizionata in una sottoregione di una sottofinestra dell'immagine e il suo valore è calcolato come somma pesata di due componenti: la somma dei pixel nella regione nera e la somma di quelli interni alla ragione bianca. I segni dei due pesi sono opposti e i loro valori assoluti sono inversamente proporzionali alle aree delle rispettive regioni, in modo da effettuare un calcolo normalizzato. Le feature Haar-like, inoltre, sono applicate modificandone la dimensione, la forma e la posizione nella sottofinestra. Il motivo legato al loro uso è da ricercarsi nella loro efficacia ai fini della localizzazione del volto e nell'efficienza con cui possono essere calcolate mediante l'impiego dell'immagine integrale. Nonostante la rapidità con cui è possibile individuarle, occorre osservare come a ogni sottofinestra possano nella pratica corrispondere diverse miliaia di feature associate.
+			La localizzazione dei volti avviene analizzando sottofinestre consecutive (sovrapposte e di dimensione variabile) dell'immagine in input, estraendo le feature presenti nella finestra e classificando la finestra stessa come volto o non volto. Le feature Haar-like sono caratterizzate dall'applicazione di regioni rettangolari di colorazione bianca e nera unite tra loro, come mostrato in Figura \ref{fig:haar_features}. Ogni feature è posizionata in una sottoregione di una sottofinestra dell'immagine e il suo valore è calcolato come somma pesata di due componenti: la somma dei pixel nella regione nera e la somma di quelli interni alla ragione bianca. I segni dei due pesi sono opposti e i loro valori assoluti sono inversamente proporzionali alle aree delle rispettive regioni, in modo da effettuare un calcolo normalizzato. Le feature Haar-like, inoltre, sono applicate modificandone la dimensione, la forma e la posizione nella sottofinestra. Il motivo legato al loro uso è da ricercarsi nella loro efficacia ai fini della localizzazione del volto e nell'efficienza con cui possono essere calcolate mediante l'impiego dell'immagine integrale. Nonostante la rapidità con cui è possibile individuarle, occorre osservare come a ogni sottofinestra possano nella pratica corrispondere diverse miliaia di feature associate.
 			\item \textbf{Immagine integrale.}\\
-			Le semplici feature rettangolari di un'immagine sono calcolate utilizzando una rappresentazione intermedia dell'immagine stessa, chiamata immagine integrale. L'immagine integrale in posizione (x,y) corrisponde alla somma del valore dei pixel sopra e a sinistra di (x,y).
+			Le semplici feature rettangolari di un'immagine sono calcolate utilizzando una rappresentazione intermedia dell'immagine stessa, chiamata immagine integrale. L'immagine integrale in posizione (x,y) corrisponde alla somma del valore dei pixel posti al di sopra e alla sinistra di (x,y).
 			\item \textbf{AdaBoost.}\\
 			AdaBoost è una tecnica di addestramento che ha l'obiettivo di costruire un classificatore non lineare complesso e robusto come combinazione lineare di M classificatori più semplici detti classificatori deboli, apprendendo la loro sequenza ottimale e i corrispondenti pesi in modo da minimizzare l'upper bound all'errore di classificazione.
 			\item \textbf{Classificatore a cascata.}\\
-			Un solo classificatore robusto, per quanto elimini una grande porzione di sottofinestre che non contengono volti (grazie alla sua caratteristica di essere non lineare), non soddisfa i requisiti di applicazioni in termini d'efficienza e di percentuale ridotta di falsi allarmi. Una possibile soluzione consiste nell'impiego di classificatori robusti in cascata, a complessità crescente. Ogni stage del classificatore a cascata mostra la regione definita dalla locazione corrente della finestra scorrevole come positiva (se il volto è stato trovato) o negativa (se il volto non è stato trovato). Se l'etichetta è negativa, la classificazione di quella regione è completa e la finestra scorrevole viene spostata sulla locazione successiva. Se invece l'etichetta è positiva, il classificatore passa la regione allo stage successivo. L'intero classificatore a cascata riporta il volto come individuato nella locazione della finestra scorrevole solo se l'ultimo stage giunge a classificare la regione come positiva. Tale approccio è usato per eliminare velocemente regioni meno probabili in modo da non richiedere elaborazione ulteriore quando non necessario.
+			Un solo classificatore robusto, per quanto elimini una grande porzione di sottofinestre che non contengono volti (grazie alla sua caratteristica di essere non lineare), non soddisfa i requisiti di applicazioni in termini d'efficienza e di percentuale ridotta di falsi allarmi. Una possibile soluzione consiste nell'impiego di classificatori robusti in cascata, a complessità crescente (come illustrato in Figura \ref{fig:cascade_classifier}). Ogni stage del classificatore a cascata mostra la regione definita dalla locazione corrente della finestra scorrevole come positiva (se il volto è stato trovato) o negativa (se il volto non è stato trovato). Se l'etichetta è negativa, la classificazione di quella regione è completa e la finestra scorrevole viene spostata sulla locazione successiva. Se invece l'etichetta è positiva, il classificatore passa la regione al prossimo stage. L'intero classificatore a cascata riporta il volto come individuato nella locazione della finestra scorrevole solo se l'ultimo stage giunge a classificare la regione come positiva. Tale approccio è usato per eliminare velocemente regioni meno probabili in modo da non richiedere elaborazione ulteriore quando non necessaria.
 		\end{itemize}
+		\vspace{0.5cm}
+		\begin{figure}[!htb]
+			\centering
+			\includegraphics[scale=0.62]{eps/haar_features.eps}
+			\caption{Esempi di feature rettangolari Haar.}
+			\label{fig:haar_features}
+		\end{figure}
+		\begin{figure}[!htb]
+			\centering
+			\includegraphics[scale=0.28]{eps/cascade_classifier.eps}
+			\caption{Classificatore a cascata applicato\\alla localizzazione del volto.}
+			\label{fig:cascade_classifier}
+		\end{figure}
+		\vspace{0.5cm}
 		\item \textbf{LBP Cascade Classifier.}\\
-		LBP\footnote{LBP. Local Binary Patterns.} è un classificatore che, come Haar, necessita di essere addestrato con centinaia di immagini. Ogni immagine di training è divisa in blocchi e per ogni blocco LBP adotta una finestra di 9 pixel (3x3), osservando con un particolare interesse il pixel collocato centralmente. Successivamente l'algoritmo compara il valore del pixel centrale con quello di ogni vicino all'interno della finestra 3x3. Ciascun pixel vicino con valore maggiore o uguale a quello del pixel centrale viene posto a 1, mentre i rimanenti a 0. Successivamente, i valori dei pixel aggiornati vengono letti in ordine orario, formando un numero binario. Tale numero binario viene poi convertito in notazione decimale e assegnato come nuovo valore del pixel centrale. L'operazione viene poi ripetuta per ogni pixel nel blocco. Infine, ogni valore contenuto in un blocco viene convertito in un istogramma. Concatenando gli istogrammi di ogni blocco si giunge a formare il vettore di feature per l'immagine.
-		\item \textbf{HOG.}
+		LBP\footnote{LBP. Local Binary Pattern.}\cite{Lbp1}\cite{Lbp2} è un classificatore che, come Haar, necessita di essere addestrato con centinaia di immagini.
+		\begin{itemize}
+			\item \textbf{Feature vector.}\\
+			Ogni immagine di training è divisa in blocchi e per ogni blocco è adottata una finestra di 9 pixel (3x3), osservando con un particolare interesse il pixel collocato centralmente. Successivamente l'algoritmo compara il valore del pixel centrale con quello di ogni vicino all'interno della finestra 3x3. Ciascun pixel vicino con valore maggiore o uguale a quello del pixel centrale viene posto a 1, mentre i rimanenti a 0. In seguito, i valori dei pixel aggiornati sono letti in ordine orario, formando un numero binario. Tale numero binario viene poi convertito in notazione decimale e assegnato come nuovo valore per il pixel centrale. L'operazione (riassunta in Figura \ref{fig:lbp_block}) viene poi ripetuta per ogni pixel interno al blocco. Infine, i valori contenuti in ogni blocco sono convertiti in istogrammi. Concatenando essi si giunge a formare il vettore di feature per l'immagine che può essere utilizzato come descrittore di texture. Nell'ambito della localizzazione facciale si può osservare come ogni immagine di volto possa essere vista come una composizione di micro-pattern rilevabili effettivamente dall'operatore LBP, il quale è estendibile per la considerazione di rapporti di vicinanza differenti in raggio e numero. L'istogramma complessivo estratto modella la texture locale e la forma globale dei volti stessi. La Figura \ref{fig:lbp_histogram} ne riporta un esempio grafico. Le più importanti proprietà relativamente alle feature LBP si riferiscono alla loro tolleranza verso cambi di illuminazione e alla loro semplicità computazionale.
+			\item \textbf{AdaBoost.}\\
+			Un classificatore robusto è costruito utilizzando \textit{gentle AdaBoost} per rimuovere informazioni ridondanti dalle caratteristiche estratte.
+			\item \textbf{Classificatore a cascata.}\\
+			I classificatori a cascata sono formati dalle feature ottenute dall'algoritmo \textit{gentle AdaBoost}. Le sotto-regioni dell'immagine sono valutate a partire da un classificatore semplice sino ad arrivare a uno robusto. Se in qualunque stage il classificatore fallisce, la regione è scartata dalle iterazioni successive.
+		\end{itemize}
+		\vspace{0.5cm}
+		\begin{figure}[!htb]
+			\centering
+			\includegraphics[scale=1]{eps/lbp_block.eps}
+			\caption{Conversione LBP applicata a un blocco.}
+			\label{fig:lbp_block}
+		\end{figure}
+		\begin{figure}[!htb]
+			\centering
+			\includegraphics[scale=0.45]{eps/lbp_histogram.eps}
+			\caption{Costruzione dell'istogramma rappresentante\\la feature LBP di un volto.}
+			\label{fig:lbp_histogram}
+		\end{figure}
+		\vspace{0.5cm}
+		\item \textbf{HOG + Linear SVM.}\\
+		L'idea base delle feature HOG\footnote{HOG. Histogram of Oriented Gradient.} è che la distribuzione dei gradienti di intensità locale o la direzione dei bordi possono caratterizzare bene l'aspetto e la forma di un oggetto o di un volto. L'algoritmo HOG conta le occorrenze dell'orientamento del gradiente in porzioni localizzate di un'immagine e si dimostra particolarmente utile per il riconoscimento di oggetti strutturati con parti deformabili. Similarmente a LBP, la rappresentazione dell'immagine è espressa come un istogramma combinato. Il metodo HOG è stato proposto per la prima volta da Navneet Dalal e Bill Triggs in un paper del 2005, dove venne dimostrato il suo uso abbinato con un SVM per l'addestramento di classificatori molto accurati.
+		\item \textbf{Localizzatori basati su Deep learning.}\\
+		Le CNN\footnote{CNN. Convolutional Neural Network.} costituiscono un approccio di deep learning in grado di realizzare il rilevamento facciale con un'accuratezza molto elevata, nonostante gli algoritmi richiedano un alto numero di dati per l'addestramento della rete neurale stessa. Secondariamente, localizzatori di questa tipologia necessitano di sistemi computazionali a elevate prestazioni per la costruzione del modello. Un'altra tecnica nota in letteratura per la localizzazione di volti, e in generale di oggetti, è SSD\footnote{SSD. Single Shot Detector.}.
 	\end{itemize}
 \end{itemize}
 
+A seguito dello studio appena presentato (i cui risultati sono riassunti in Tabella \ref{table:face_detection}, specificatamente alla problematica del rilevamento del volto), si è scelto di non adottare algoritmi \textit{HOG + Linear SVM} o approcci basati su \textit{Deep learning}. Questa decisione deriva da un trade-off tra efficacia ed efficienza, inevitabile per via delle limitate capacità prestazionali di Raspberry Pi 3 B. Tecniche basate su HOG e Deep learning, infatti, nonostante siano ideali sul piano dell'accuratezza, non si dimostrano sufficientemente veloci per garantire le prestazioni real-time richieste dall'elaborato in esame. In fase di progettazione non si è inoltre operata una scelta ferma tra \textit{Haar Cascade Classifier} e \textit{LBP Cascade Classifier}, ritenendo opportuno testare entrambi gli algoritmi al fine di stabilire il migliore per la problematica trattata. È importante osservare tuttavia come si sia consapevoli - sin dalla fase di Design - dei limiti intrinseci del sistema in termini di risposta ai cambiamenti d'illuminazione, di efficiacia con colorazioni scure della pelle e dall'eventuale uso di occhiali o oggettistica di altro tipo. Si nota infine come il limite nel riconoscimento di volti angolati non costituisca un problema di grande entità a causa della posizione frontale del volto assunta in larga parte da un conducente.
+
+\begin{table}[h]
+	\begin{adjustbox}{width=\textwidth}
+	\begin{tabular}{|l|c|c|}
+		\hline
+		\multicolumn{1}{|c|}{\textbf{Algoritmo}} & \textbf{Vantaggi} & \textbf{Svantaggi}\\ \hline
+		\textbf{Haar} &
+		\begin{tabular}[c]{@{}c@{}}
+			- Molto più veloce degli algoritmi\\
+			HOG + Linear SVM
+		\end{tabular} &
+		\begin{tabular}[c]{@{}c@{}}
+			- Meno accurato di HOG + Linear SVM\\
+			- Produce un numero maggiore di\\falsi positivi
+			rispetto a\\HOG + Linear SVM\\
+			- Ha problemi nel riconoscimento\\di volti angolati
+		\end{tabular}\\ \hline
+		\textbf{LBP} &
+		\begin{tabular}[c]{@{}c@{}}
+			- Molto più veloce degli Haar cascade\\($\approx$ 3x)
+		\end{tabular} &
+		\begin{tabular}[c]{@{}c@{}}
+			- Meno accurato degli Haar cascade
+		\end{tabular}\\ \hline
+		\textbf{HOG + Linear SVM} &
+		\begin{tabular}[c]{@{}c@{}}
+			- Significativamente più accurato\\degli Haar cascade\\
+			- Produce un minor numero di falsi positivi\\rispetto agli Haar cascade
+		\end{tabular} & - Più lento rispetto agli Haar cascade\\ \hline
+		\textbf{Deep learning based} &
+		\begin{tabular}[c]{@{}c@{}}
+			- Significativamente più accurati e robusti\\di Haar e
+			HOG + Linear SVM\\quando addestrati correttamente\\
+			- Rilevano con buona accuratezza\\($\approx$ 70\%)
+			anche volti angolati\\
+			- Non hanno problemi con condizioni\\
+			di luce critiche e ombre
+		\end{tabular} &
+		\begin{tabular}[c]{@{}c@{}}
+			- Possono essere molto lenti\\sulla base della
+			profondità e\\della complessità del modello\\
+			- L'addestramento richiede molti dati
+		\end{tabular}\\ \hline
+	\end{tabular}
+	\end{adjustbox}
+	\caption{Comparazione tra i principali algoritmi di localizzazione del volto.}
+	\label{table:face_detection}
+\end{table}
+
 \subsubsection{Rilevamento dei punti di riferimento facciali}
 
+Dopo la localizzazione del volto (che da un punto di vista pratico fornisce il rettangolo all'interno del quale è collocato il viso del conducente), è applicato lo step di rilevamento degli occhi. Questo passaggio fornisce la base strutturale per la successiva estrazione di misure di sonnolenza. La localizzazione degli occhi è realizzata attraverso l'estrazione di \textit{facial landmark}. L'obiettivo è quello di individuare i punti di riferimento facciali di maggior importanza in ogni frame (es. occhi, naso, bocca, mento, sopracciglia), adottando metodi di previsione di forma (\textit{shape predictor}). Ciò è realizzato utilizzando una forma di mark-up consistente di diversi punti salienti, che viene adattata alla reale immagine del viso. Per stimare l'allineamento tra i punti del volto di mark-up e i punti di quello reale ci sono due principali categorie di approcci che possono essere adottati.
+\begin{itemize}
+	\item \textbf{Optimization-based}, che adattano la forma di mark-up in modo da ridurre al minimo una funzione di errore.
+	\item \textbf{Regression-based}, che apprendono una funzione di regressione capace di realizzare direttamente l'associazione.
+\end{itemize}
+In questo progetto, la strategia di allineamento adottata consiste in una cascata di funzioni di regressione. Un'illustrazione della forma facciale di mark-up utilizzata è mostrata in Figura \ref{fig:facial_landmarks_68_markup}.
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.12]{eps/facial_landmarks_68_markup.eps}
+	\caption{Facial landmark mark-up a 68 punti.}
+	\label{fig:facial_landmarks_68_markup}
+\end{figure}
+
 \subsubsection{Rilevamento della sonnolenza}
+
+Per rilevare la sonnolenza, il progetto considera una misura comportamentale basata su una chiusura degli occhi protrattasi da parte del guidatore per un tempo superiore alla norma. Essere in grado di distinguere un occhio aperto da uno chiuso è di conseguenza fondamentale. In letteratura un fenomeno di questo tipo corrisponde a un \textit{eye blink} perdurato. Le tecniche per la rilevazione di \textit{eye blinking} possono pertanto essere estese al caso in esame. A partire dai punti di riferimento facciali associati a un occhio è possibile applicare il calcolo dell'EAR, un'elegante metrica introdotta nel 2016 da \cite{EAR}.
+Ogni occhio è rappresentato da 6 coordinate (x, y), enumerate a partire dal lato sinistro e proseguenti in ordine orario lungo la parte restante della regione (come riscontrabile in Figura \ref{fig:eye_6_landmarks}).
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.35]{eps/eye_6_landmarks.eps}
+	\caption{I 6 punti di riferimento facciali associati a un occhio.}
+	\label{fig:eye_6_landmarks}
+\end{figure}
+L'\textit{eye aspect ratio} esprime in forma di equazione una relazione tra la larghezza e l'altezza delle coordinate in oggetto.
+\begin{equation}
+EAR = \frac{\left\Vert{p_2 - p_6}\right\Vert + \left\Vert{p_3 - p_5}\right\Vert}{2 \times {\left\Vert{p_1 - p_4}\right\Vert}}
+\end{equation}
+Il numeratore dell'equazione computa la distanza tra i punti di riferimento verticali dell'occhio, mentre il denominatore considera la distanza tra i punti orizzontali (pesata opportunamente dal momento che vi sono un solo set di punti orizzontali e due set di punti verticali). La caratteristica che rende questa equazione interessante è legata al fatto che l'EAR assume un valore approssimativamente costante quando l'occhio è aperto, ma scende rapidamente a zero nel momento in cui un battito di ciglia ha luogo. La Figura \ref{fig:blink_detection_plot} mostra l'andamento dell'EAR estratto da un video di esempio.
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.50]{eps/blink_detection_plot.eps}
+	\caption{Grafico dell'EAR nel tempo. Il brusco calo di valore e il suo successivo rialzo indica l'avvenimento di un battito di ciglia.}
+	\label{fig:blink_detection_plot}
+\end{figure}
+I vantaggi derivanti dall'uso dell'EAR, nonché i motivi per cui si è scelto di basarsi su esso, sono:
+\begin{itemize}
+	\item consente di stimare l'apertura degli occhi mediante una sola grandezza scalare;
+	\item è calcolabile da una sola immagine;
+	\item supera i risultati allo stato dell'arte su due dataset standard;
+	\item è una semplice equazione calcolabile in breve tempo e capace di garantire un funzionamento real-time.
+\end{itemize}
+Queste caratteristiche rendono EAR una scelta ideale, tenendo conto anche dei limiti prestazionali di Raspberry Pi 3 B. Riepilogando, in fase di progettazione si è pertanto scelto di non far uso di metodi tradizionali di \textit{image processing} per il riconoscimento della chiusura degli occhi. Tali approcci (come \textit{template matching} o calcolo della percentuale di pixel interni alla regione bianca degli occhi) sono stati inizialmente presi in considerazione ma scartati in seguito, a causa della loro minor efficacia e del loro maggior costo da un punto di vista computazionale.
 
 \subsection{Architettura software}
 
 \subsubsection{Flowchart dell'algoritmo}
 
 \subsection{Architettura fisica}
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.27]{eps/circuit.eps}
+	\caption{Schema circuitale del progetto}
+	\label{fig:circuit}
+\end{figure}
 
 \iffalse
 
@@ -393,6 +539,8 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 - Imutils
 - Fissaggio camera
 - Script
+
+Noi utilizziamo la libreria Dlib a questo scopo, la quale fornisce un \textit{facial landmark detector} già addestrato (basato su HOG e SVM).
 
 Esporre i principali problemi affrontati durante l'effettiva realizzazione delle componenti hardware/software e illustrare le soluzioni implementative adottate. Se l'elaborato ha previsto l'utilizzo di tecnologie già disponibili sul mercato, discuterne brevemente le caratteristiche e motivarne l'adozione rispetto ad altre soluzioni assimilabili.\\
 
