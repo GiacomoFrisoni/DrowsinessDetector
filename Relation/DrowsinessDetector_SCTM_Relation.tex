@@ -378,14 +378,14 @@ Rilevare la presenza del volto del conducente e localizzarne la posizione all'in
 			\label{fig:lbp_histogram}
 		\end{figure}
 		\vspace{0.5cm}
-		\item \textbf{HOG + Linear SVM.}\\
+		\item \textbf{HOG + Linear SVM\footnote{SVM. Support Vector Machine.}.}\\
 		L'idea base delle feature HOG\footnote{HOG. Histogram of Oriented Gradient.} è che la distribuzione dei gradienti di intensità locale o la direzione dei bordi possono caratterizzare bene l'aspetto e la forma di un oggetto o di un volto. L'algoritmo HOG conta le occorrenze dell'orientamento del gradiente in porzioni localizzate di un'immagine e si dimostra particolarmente utile per il riconoscimento di oggetti strutturati con parti deformabili. Similarmente a LBP, la rappresentazione dell'immagine è espressa come un istogramma combinato. Il metodo HOG è stato proposto per la prima volta da Navneet Dalal e Bill Triggs in un paper del 2005, dove venne dimostrato il suo uso abbinato con un SVM per l'addestramento di classificatori molto accurati.
 		\item \textbf{Localizzatori basati su Deep learning.}\\
 		Le CNN\footnote{CNN. Convolutional Neural Network.} costituiscono un approccio di deep learning in grado di realizzare il rilevamento facciale con un'accuratezza molto elevata, nonostante gli algoritmi richiedano un alto numero di dati per l'addestramento della rete neurale stessa. Secondariamente, localizzatori di questa tipologia necessitano di sistemi computazionali a elevate prestazioni per la costruzione del modello. Un'altra tecnica nota in letteratura per la localizzazione di volti, e in generale di oggetti, è SSD\footnote{SSD. Single Shot Detector.}.
 	\end{itemize}
 \end{itemize}
 
-A seguito dello studio appena presentato (i cui risultati sono riassunti in Tabella \ref{table:face_detection}, specificatamente alla problematica del rilevamento del volto), si è scelto di non adottare algoritmi \textit{HOG + Linear SVM} o approcci basati su \textit{Deep learning}. Questa decisione deriva da un trade-off tra efficacia ed efficienza, inevitabile per via delle limitate capacità prestazionali di Raspberry Pi 3 B. Tecniche basate su HOG e Deep learning, infatti, nonostante siano ideali sul piano dell'accuratezza, non si dimostrano sufficientemente veloci per garantire le prestazioni real-time richieste dall'elaborato in esame. In fase di progettazione non si è inoltre operata una scelta ferma tra \textit{Haar Cascade Classifier} e \textit{LBP Cascade Classifier}, ritenendo opportuno testare entrambi gli algoritmi al fine di stabilire il migliore per la problematica trattata. È importante osservare tuttavia come si sia consapevoli - sin dalla fase di Design - dei limiti intrinseci del sistema in termini di risposta ai cambiamenti d'illuminazione, di efficiacia con colorazioni scure della pelle e dall'eventuale uso di occhiali o oggettistica di altro tipo. Si nota infine come il limite nel riconoscimento di volti angolati non costituisca un problema di grande entità a causa della posizione frontale del volto assunta in larga parte da un conducente.
+A seguito dello studio appena presentato (i cui risultati sono riassunti in Tabella \ref{table:face_detection}, specificatamente alla problematica del rilevamento del volto), si è scelto di non adottare algoritmi \textit{HOG + Linear SVM} o approcci basati su \textit{Deep learning}. Questa decisione deriva da un trade-off tra efficacia ed efficienza, inevitabile per via delle limitate capacità prestazionali di Raspberry Pi 3 B. Tecniche basate su HOG e Deep learning, infatti, nonostante siano ideali sul piano dell'accuratezza, non si dimostrano sufficientemente veloci per garantire le prestazioni real-time richieste dall'elaborato in esame. In fase di progettazione non si è inoltre operata una scelta ferma tra \textit{Haar Cascade Classifier} e \textit{LBP Cascade Classifier}, ritenendo opportuno testare entrambi gli algoritmi al fine di stabilire il migliore per la problematica trattata. È importante osservare tuttavia come si sia consapevoli - sin dalla fase di Design - dei limiti intrinseci del sistema in termini di risposta ai cambiamenti d'illuminazione, di efficacia con colorazioni scure della pelle e dall'eventuale uso di occhiali o oggettistica di altro tipo. Si nota infine come il limite nel riconoscimento di volti angolati non costituisca un problema di grande entità a causa della posizione frontale del volto assunta in larga parte da un conducente.
 
 \begin{table}[h]
 	\begin{adjustbox}{width=\textwidth}
@@ -453,7 +453,7 @@ In questo progetto, la strategia di allineamento adottata consiste in una cascat
 
 \subsubsection{Rilevamento della sonnolenza}
 
-Per rilevare la sonnolenza, il progetto considera una misura comportamentale basata su una chiusura degli occhi protrattasi da parte del guidatore per un tempo superiore alla norma. Essere in grado di distinguere un occhio aperto da uno chiuso è di conseguenza fondamentale. In letteratura un fenomeno di questo tipo corrisponde a un \textit{eye blink} perdurato. Le tecniche per la rilevazione di \textit{eye blinking} possono pertanto essere estese al caso in esame. A partire dai punti di riferimento facciali associati a un occhio è possibile applicare il calcolo dell'EAR, un'elegante metrica introdotta nel 2016 da \cite{EAR}.
+Per rilevare la sonnolenza, il progetto considera una misura comportamentale basata su una chiusura degli occhi protrattasi da parte del guidatore per un tempo superiore alla norma. Essere in grado di distinguere un occhio aperto da uno chiuso è di conseguenza fondamentale. A partire dai punti di riferimento facciali associati a un occhio è possibile applicare il calcolo dell'EAR, un'elegante metrica introdotta nel 2016 da \cite{EAR}.
 Ogni occhio è rappresentato da 6 coordinate (x, y), enumerate a partire dal lato sinistro e proseguenti in ordine orario lungo la parte restante della regione (come riscontrabile in Figura \ref{fig:eye_6_landmarks}).
 \begin{figure}[!htb]
 	\centering
@@ -465,25 +465,46 @@ L'\textit{eye aspect ratio} esprime in forma di equazione una relazione tra la l
 \begin{equation}
 EAR = \frac{\left\Vert{p_2 - p_6}\right\Vert + \left\Vert{p_3 - p_5}\right\Vert}{2 \times {\left\Vert{p_1 - p_4}\right\Vert}}
 \end{equation}
-Il numeratore dell'equazione computa la distanza tra i punti di riferimento verticali dell'occhio, mentre il denominatore considera la distanza tra i punti orizzontali (pesata opportunamente dal momento che vi sono un solo set di punti orizzontali e due set di punti verticali). La caratteristica che rende questa equazione interessante è legata al fatto che l'EAR assume un valore approssimativamente costante quando l'occhio è aperto, ma scende rapidamente a zero nel momento in cui un battito di ciglia ha luogo. La Figura \ref{fig:blink_detection_plot} mostra l'andamento dell'EAR estratto da un video di esempio.
+Il numeratore dell'equazione computa la distanza tra i punti di riferimento verticali dell'occhio, mentre il denominatore considera la distanza tra i punti orizzontali (pesata opportunamente dal momento che vi sono un solo set di punti orizzontali e due set di punti verticali). La caratteristica che rende questa equazione interessante è legata al fatto che l'EAR assume un valore approssimativamente costante quando l'occhio è aperto, ma scende rapidamente a zero nel momento in cui lo si chiude. Questo approccio può pertanto essere usato sia per rilevare battiti di ciglia (\textit{eye blinking}) che per misurare il livello di apertura degli occhi. La Figura \ref{fig:blink_detection_plot} mostra l'andamento dell'EAR estratto da un video di esempio.
 \begin{figure}[!htb]
 	\centering
 	\includegraphics[scale=0.50]{eps/blink_detection_plot.eps}
-	\caption{Grafico dell'EAR nel tempo. Il brusco calo di valore e il suo successivo rialzo indica l'avvenimento di un battito di ciglia.}
+	\caption{Esempio di segnale EAR lungo una sequenza video. Il brusco calo di valore e il suo successivo rialzo indica l'avvenimento di un battito di ciglia.}
 	\label{fig:blink_detection_plot}
 \end{figure}
 I vantaggi derivanti dall'uso dell'EAR, nonché i motivi per cui si è scelto di basarsi su esso, sono:
 \begin{itemize}
 	\item consente di stimare l'apertura degli occhi mediante una sola grandezza scalare;
-	\item è calcolabile da una sola immagine;
+	\item nella sua versione base, è calcolabile da una sola immagine;
+	\item ha una piccola varianza tra gli individui ed è completamente invariante rispetto a un ridimensionamento uniforme dell'immagine e alla rotazione in piano del viso;
 	\item supera i risultati allo stato dell'arte su due dataset standard;
 	\item è una semplice equazione calcolabile in breve tempo e capace di garantire un funzionamento real-time.
 \end{itemize}
-Queste caratteristiche rendono EAR una scelta ideale, tenendo conto anche dei limiti prestazionali di Raspberry Pi 3 B. Riepilogando, in fase di progettazione si è pertanto scelto di non far uso di metodi tradizionali di \textit{image processing} per il riconoscimento della chiusura degli occhi. Tali approcci (come \textit{template matching} o calcolo della percentuale di pixel interni alla regione bianca degli occhi) sono stati inizialmente presi in considerazione ma scartati in seguito, a causa della loro minor efficacia e del loro maggior costo da un punto di vista computazionale.
+Queste caratteristiche rendono EAR una scelta ideale, tenendo conto anche dei limiti prestazionali di Raspberry Pi 3 B. Riepilogando, in fase di progettazione si è pertanto scelto di non far uso di metodi tradizionali di \textit{image processing} per il riconoscimento della chiusura degli occhi. Tali approcci (come \textit{template matching} o calcolo della percentuale di pixel interni alla regione bianca degli occhi) sono stati inizialmente presi in considerazione ma scartati in seguito, a causa della loro minor efficacia e del loro maggior costo da un punto di vista computazionale.\\
+A partire dalla definizione di EAR, come indicato anche nel paper originario\cite{EAR}, tre metodi di classificazione possono essere adottati per il rilevamento della sonnolenza.
+\begin{itemize}
+	\item \textbf{EAR thresholding.}\\
+	È fissato un valore di soglia e nel momento in cui l'EAR dell'utente diviene inferiore a essa per un determinato numero di frame consecutivi, una chiusura degli occhi è riconosciuta. Tuttavia, una singola soglia non è perfettamente adatta per tutte le persone dal momento che ogni individuo possiede il proprio \quotes{EAR naturale} in funzione delle caratteristiche facciali che lo contraddistinguono. Un approccio di questo tipo consente un'elaborazione per-frame ma tende a produrre un alto numero di falsi positivi. La discesa dell'EAR al di sotto della soglia, infatti, non necessariamente è dovuta a un \textit{eye blink} ma può essere provocata da espressioni facciali (es. parlato, sbadiglio o sorriso).
+	\item \textbf{EAR SVM.}
+	Si considera come input una finestra temporale più grande di un singolo frame (es. 13 frame consecutivi), cui associare uno stato dell'utente classificabile in tre categorie (occhio aperto, battito di ciglia, occhio chiuso). SVM è utilizzato come algoritmo di classificazione, definendo il problema come una funzione di mapping tra un vettore di input \texttt{x} e uno scalare di output \texttt{y} (0,1 o 2 sulla base della classe prevista). Un classificatore di questo tipo tuttavia possiede comunque diversi limiti e richiede un alto numero di dati eterogenei per l'addestramento. Inoltre è generale, ovvero è computato una volta sola e rimane lo stesso per tutti i dati di testing.
+	\item \textbf{EAR HMM\footnote{HMM. Hidden Markov Model.}\cite{EarHmm}.} È un modello adattivo capace di far fronte alle principali problematiche dell'EAR SVM. L'EAR HMM, infatti, tiene conto di come la durata dei battiti di ciglia e la loro velocità differiscano da persona a persona (oltre che poter cambiare per lo stesso individuo nel tempo), rendendo l'EAR una caratteristica non statica. La Figura \ref{fig:ear_methods} ne riporta un'applicazione.  
+\end{itemize}
+Per il progetto in esame si è scelto di adottare EAR thresholding, a causa del ridotto tempo a disposizione (come requisito implementativo) e della non disponibilità di un elevato numero di dati etichettati specificatamente allo scenario di guida.
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.60]{eps/ear_methods.eps}
+	\caption{Esempio di debole battito di ciglia. Solo il metodo adattivo EAR HMM è in grado di rilevarlo correttamente.}
+	\label{fig:ear_methods}
+\end{figure}
 
 \subsection{Architettura software}
 
-\subsubsection{Flowchart dell'algoritmo}
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.58]{eps/flowchart.eps}
+	\caption{Flowchart dell'algoritmo}
+	\label{fig:flowchart}
+\end{figure}
 
 \subsection{Architettura fisica}
 
@@ -856,6 +877,8 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 %----------------------------------------------------------------------------------------
 
 \section{Conclusioni}
+
+Calibrazione soglia EAR per utente.
 
 However, it has been found that the rate of detecting the correct feature, or the percentage of success among a number of detection attempts, varies depending on the application and number of classes. The determination of drowsiness using PERCLOS and Eye Blink has a success rate of close to 100\% [43] and 98\% [45], respectively. However it has to be noted that, the high positive detection rate achieved by [43] was when the subjects didn’t wear glasses. Likewise, as most researchers conducted their experiments in simulated environment they achieved a higher success rate. The positive detection rate decreased significantly when the experiment was carried out in a real environment [15].
 Another limitation of behavioral measure was brought out in an experiment conducted by Golz et al. They evaluated various drowsiness monitoring commercial products, and observed that driver state cannot be correlated to driving performance and vehicle status based on behavioral measures alone [57].
