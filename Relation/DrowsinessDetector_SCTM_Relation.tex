@@ -33,10 +33,13 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%librerie per la visualizzazione del codice
 \usepackage{listings}
+\usepackage{xcolor}
 \lstset{
 	language=bash,
-	basicstyle=\ttfamily,
+	basicstyle=\small\ttfamily\color{white},
 	frame=tblr,
+	backgroundcolor=\color{darkgray},
+	xleftmargin=0.2em
 }
 
 \usepackage{pythonhighlight}
@@ -560,145 +563,139 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 In questa sezione sono riportati i principali problemi affrontati durante l'effettiva realizzazione delle componenti hardware e software, illustrando le soluzioni implementative adottate.
 
 \subsection{Configurazione Raspberry Pi}
-Prima di essere utilizzato, il single-board computer Raspberry Pi dev'essere opportunamente configurato. Esso necessita, infatti, di un vero e proprio sistema operativo sul quale far affidamento. Solo successivamente, interagendo direttamente con esso, si potranno svolgere tutte le operazioni di progettazione, sviluppo e testing.
+Prima di essere utilizzato, il single-board computer Raspberry Pi dev'essere opportunamente configurato. Esso necessita, infatti, di un vero e proprio sistema operativo sul quale far affidamento. Solo successivamente, interagendo direttamente con esso, si è in grado di svolgere tutte le operazioni di progettazione, sviluppo e testing. L'intero procedimento di configurazione può essere suddiviso in due parti: la prima, incentrata sull'uso di un Personal Computer di appoggio e la seconda, direttamente realizzata sul dispositivo inizializzato.
 
 \subsubsection{Memoria}
-Tutto il software necessario per il corretto funzionamento del Raspberry è caricato in una scheda MicroSD, opportunamente tarata in termini di capacità per uno specifico progetto sulla base dell'occupazione di memoria richiesta da quest'ultimo. Considerando il prezzo contenuto e la semplice reperibilità di una scheda compatibile, si è preferito lasciare un modesto margine di memoria libera (adottandone una con capacità pari a 32GB), ampiamente sufficiente per contenere il sistema operativo, i vari IDE per lo sviluppo e l'intero dataset. Il procedimento di configurazione può essere suddiviso in due parti: la prima, incentrata sull'uso di un Personal Computer di appoggio e la seconda, direttamente realizzata sul dispositivo inizializzato.
+Tutto il software necessario per il corretto funzionamento del Raspberry è caricato in una scheda MicroSD, opportunamente tarata in termini di capacità per uno specifico progetto sulla base dell'occupazione di memoria richiesta da quest'ultimo. Considerando il prezzo contenuto e la semplice reperibilità di una scheda compatibile, si è preferito lasciare un modesto margine di memoria libera (adottandone una con capacità pari a 32GB), ampiamente sufficiente per contenere il sistema operativo, i vari IDE per lo sviluppo e l'intero dataset.
 
 \subsubsection{Installazione Sistema Operativo}
-In questa fase la MicroSD dev'essere connessa al Personal Computer che verrà utilizzato per configurarla: infatti, prima di essere utilizzata direttamente sul Raspberry, la MicroSD dev'essere opportunamente formattata in formato FAT32; per eseguire questa operazione si fa riferimento al software \quotes{SD Memory Card Formatter} (disponibile per Windows e Mac), che in pochi passaggi e poco tempo esegue l'operazione richiesta. Successivamente si provvede alla scelta del Sistema Operativo che il Raspberry metterà in esecuzione. Questa scelta ricade sull'utente e sugli eventuali vincoli da soddisfare: esistono infatti innumerevoli distro Linux disponibili gratuitamente al download e pronte all'utilizzo. Seguendo le linee guida riportate direttamente sul sito del produttore del Raspberry, si sceglie la distribuzione \textbf{Raspbian}: essa risulta essere basata su Debian, opportunamente ottimizzato per funzionare sul Raspberry. Il caricamento di quest'ultimo può avvenire in due modi: attraverso l'operazione di \quotes{flash} del sistema operativo direttamente sulla MicroSD, oppure tramite un installer (chiamato NOOBS, \textit{New Out Of the Box Software}). Per facilità di installazione, si preferisce la seconda: dopo l'ottenimento dell'archivio \textit{.zip} dal sito ufficiale, si estrae il suo contenuto direttamente dentro la MicroSD formattata in precedenza. Così facendo, il dispositivo potrà avviare una modalità d'installazione, nella quale scegliere, successivamente, tutti i componenti aggiuntivi da installare al sistema operativo. Soltanto adesso la MicroSD può essere rimossa dal computer e inserita dentro il Raspberry nell'apposito slot.\\
+In questa fase la MicroSD è connessa al Personal Computer, in modo che quest'ultimo possa essere utilizzato per configurarla. Prima di poter essere impiegata direttamente sul Raspberry, infatti, la scheda MicroSD dev'essere opportunamente formattata in formato FAT32. Per lo svolgimento di tale operazione si è fatto riferimento al software \quotes{SD Memory Card Formatter} (disponibile per Windows e Mac).
 
-Per procedere nei successivi passi di configurazione si ha necessità di alcune periferiche input/output connesse direttamente al Raspberry: una tastiera, un mouse e un monitor con entrata HDMI, nonchè un cavo HDMI per collegare il device al monitor e l'alimentatore per il Raspberry (5V, 2.1A). Si collega l'alimentatore nell'apposito ingresso MicroUSB, facendo partire l'installazione guidata. Tramite mouse e tastiera si selezionano le preferenze riguardanti il software da installare, che in questo caso risulta essere soltanto il sistema operativo completo di alcuni tool e programmi preinstallati. Completata la procedura d'installazione, il device è pronto all'utilizzo e si può procedere alla seconda fase di configurazione.
+Successivamente occorre provvedere alla scelta del Sistema Operativo messo in esecuzione dal Raspberry. Questa decisione ricade sull'utente e sugli eventuali vincoli da soddisfare: esistono infatti numerose distro Linux disponibili gratuitamente al download e pronte all'utilizzo. Per quanto concerne il progetto in esame, seguendo le linee guida riportate direttamente sul sito del produttore, si è scelta la distribuzione \textit{Raspbian}: basata su Debian e opportunamente ottimizzata per funzionare su Raspberry Pi. Il caricamento di Raspbian, inoltre, può avvenire in due modi: attraverso l'operazione di \quotes{flash} del Sistema Operativo direttamente sulla MicroSD, oppure tramite un installer (denominato NOOBS\footnote{NOOBS. New Out Of the Box Software.}). Per facilità di installazione, si è preferita la seconda opzione: dopo l'ottenimento dell'archivio \textit{.zip} dal sito ufficiale, si è dunque estratto il suo contenuto direttamente dentro la MicroSD formattata in precedenza.
+
+Giunti a questo punto, il dispositivo può avviare una modalità per l'installazione di tutti i componenti aggiuntivi desiderati. Soltanto al termine di questo passaggio la MicroSD può essere rimossa dal computer e inserita nell'apposito slot presente su Raspberry. Completata la procedura d'installazione guidata, grazie all'uso di alcune periferiche di input e output connesse direttamente al Raspberry Pi stesso (quali tastiera, mouse, monitor con entrata HDMI, cavo HDMI e alimentatore 5V / 2,1A), il device è pronto all'utilizzo e si può pertanto procedere alla seconda fase di configurazione.
 
 \subsubsection{Installazione Software e Librerie}
-Il computer utilizzato nella prima fase della configurazione può essere ora spento, dato che il Raspberry risulta essere ora, a tutti gli effetti, un completo computer con un browser, accesso a internet (previa connessione via WiFi o Ethernet) e diversi software per lo sviluppo. Gli strumenti forniti di default non sono comunque sufficienti ai fini del progetto, per cui si procede alla manuale configurazione e installazione dei vari software / pacchetti / librerie / tool per permettere e facilitare il successivo sviluppo. Gli strumenti illustrati successivamente devono essere necessariamente installati nell'ordine in cui appaiono, altrimenti vi è il rischio che non ci siano dipendenze sufficienti.\\
 
-Prima di procedere con qualsiasi modifica, è buona norma assicurarsi che il pacchetto per l'ottenimento del software aggiuntivo sia aggiornato. Si eseguono due comandi per effettuare la verifica:
+Al termine della prima fase il Raspbery Pi è a tutti gli effetti un computer completo, dotato di browser, accesso a Internet (previa connessione via WiFi o Ethernet) e diversi software per lo sviluppo. Gli strumenti forniti di default non sono tuttavia sufficienti ai fini del progetto. Di conseguenza si procede all'installazione manuale di ulteriori pacchetti, tool e librerie al fine di consentire e agevolare il successivo sviluppo.
+
+Prima di procedere con qualsiasi modifica, è buona norma assicurarsi che il pacchetto per l'ottenimento del software aggiuntivo sia aggiornato. Si eseguono due comandi per lo svolgimento di tale verifica:
 \begin{lstlisting}
 sudo apt-get update
 sudo apt-get upgrade
 \end{lstlisting}
 
-L'unico software aggiunto al sistema operativo è \textbf{Visual Studio Code}: il programma si presenta come un editor testuale, con supporto a diversi linguaggi e script; abilita l'highlight del codice e un discreto aiuto con suggerimenti durante la fase di immissione testo, per quanto riguarda nomi variabili, metodi ecc... Verrà installato sotto il nome di "inserire il nome qui" e si ottiene utilizzando la console, tramite due comandi:
+Le seguenti fasi riportano il processo di installazione degli strumenti necessari per l'elaborato. L'ottemperanza dell'ordine proposto è importante per evitare il rischio di incorrere in dipendenze non sufficienti.\\
 
+\textbf{Visual Studio Code}\\
+È un editor di codice sorgente open source sviluppato da Microsoft, con supporto a diversi linguaggi di programmazione. Esso include il supporto a \textit{Syntax highlighting}, \textit{IntelliSense}, \textit{Snippet} e \textit{refactoring} del codice. Lo si ottiene, utilizzando la console, tramite due comandi:
 \begin{lstlisting}
 wget https://packagecloud.io/headmelted/codebuilds/gpgkey 
 -O - | sudo apt-key add -
 \end{lstlisting}
-
 \begin{lstlisting}
 curl -L https://code.headmelted.com/installers/apt.sh
 | sudo bash
 \end{lstlisting}
 
-Successivamente si procede all'installazione della libreria \textbf{OpenCV}, discussa nel capitolo "inserire il capitolo qui". Per funzionare correttamente e in modo ottimizzato sul Raspberry esiste una versione ad hoc, pensata per i dispositivi con poca capacità di calcolo. Per poterla eseguire è necessario però installare alcune dipendenze, quali \textit{libhdf5-dev}, \textit{libhdf5-serial-dev}, \textit{libqtwebkit4} e \textit{libqt4-test}, il package manager di Python e il gestore degli ambienti virtuali di Python. Le \textbf{dipendenze} sono facilmente ottenibili tramite l'esecuzione di pochi comandi:
-	
+\vspace{0.5cm}
+\textbf{OpenCV}\\
+È una libreria software open source (discussa più approfonditamente nella successiva sezione \ref{X}).
+Essa è disponibile in una versione ad hoc ottimizzata per dispositivi con ridotta capacità di calcolo, come Raspberry Pi. Per poterla utilizzare è necessario però installare alcune dipendenze, quali \textit{libhdf5-dev}, \textit{libhdf5-serial-dev}, \textit{libqtwebkit4}, \textit{libqt4-test}, il package manager di Python e il gestore degli ambienti virtuali di Python. Le dipendenze in oggetto sono facilmente ottenibili tramite l'esecuzione di pochi comandi:
 \begin{lstlisting}
 sudo apt-get install libhdf5-dev libhdf5-serial-dev
 sudo apt-get install libqtwebkit4 libqt4-test
+sudo apt-get install build-essential cmake
+sudo apt-get install libgtk-3-dev
+sudo apt-get install libboost-all-dev
 \end{lstlisting}
-
-Lo stesso discorso vale per il Package Manager di Python \textbf{(PIP)}. Esso si ottiene mediante i comandi:
-
+Lo stesso vale per il Package Manager di Python (\textit{pip}). È possibile ottenerlo mediante i comandi:
 \begin{lstlisting}
 wget https://bootstrap.pypa.io/get-pip.py
 sudo python3 get-pip.py
 \end{lstlisting}
-			
-Per poter lavorare comodamente con diversi progetti che richiedono diverse librerie, è preferibile utilizzare ambienti virtuali. Essi sono facilmente intercambiabili e permettono di evitare conflitti di librerie nel caso in cui si vuole gestire più progetti Python in un unico device. Utilizzando \textit{PIP} si può facilmente ottenere il \textbf{Gestore degli Ambienti Virtuali}:
+Per poter lavorare comodamente con diversi progetti richiedenti librerie differenti, è preferibile utilizzare degli ambienti virtuali. Essi sono facilmente intercambiabili e permettono proprio di evitare conflitti di librerie nel caso in cui si vogliano gestire più progetti Python in un unico device. Utilizzando \textit{pip} si può facilmente ottenere il \quotes{Gestore degli Ambienti Virtuali}:
 \begin{lstlisting}
 pip install virtualenv virtualenvwrapper
-\end{lstlisting}	
-			
-Per utilizzare i comandi resi disponibili dal precedente pacchetto, occorre modificare il file \textit{~/.profile}: si può utilizzare un editor di testo a piacere (vim, nano o qualsiasi tool grafico) per inserire alla fine di questo file le seguenti righe:
-
+\end{lstlisting}
+Per utilizzare i comandi resi disponibili dal precedente pacchetto, occorre modificare il file \textit{~/.profile}, utilizzando un editor di testo a piacere (vim, nano o un tool grafico di qualunque natura) per inserire in coda le righe di seguito riportate.
 \begin{lstlisting}
 # virtualenv and virtualenvwrapper
 export WORKON_HOME=$HOME/.virtualenvs
 export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
 source /usr/local/bin/virtualenvwrapper.sh
 \end{lstlisting}
-
-I comandi sono pronti ora all'utilizzo, ma ogni tal volta in cui si apre una nuova finestra console è necessario eseguire il seguente comando per far riconoscere come validi i comandi per la gestione degli ambienti virtuali:
-
+Gli ambienti virtuali sono così pronti all'utilizzo, ma ogni qual volta che si apre una nuova finestra console è necessario eseguire il successivo comando per far riconoscere come valide le operazioni compiute per la gestione degli ambienti virtuali stessi.
 \begin{lstlisting}
 source ~/.profile
 \end{lstlisting}
-
-La creazione di un ambiente virtuale avviene a liena di comando. Per creare un nuovo ambiente virtuale di nome \quotes{cv} si esegue il seguente comando:
+Per lo svolgimento del progetto si è creato un nuovo ambiente virtuale denominato \quotes{cv} grazie al comando:
 \begin{lstlisting}
 mkvirtualenv cv -p python3
 \end{lstlisting}
-
-Successivamente, per impostarlo come attuale ambiente sul quale si sta lavorando, si esegue:
+Per impostare \quotes{cv} come ambiente di lavoro attuale, si è invece eseguito:
 \begin{lstlisting}
 workon cv
 \end{lstlisting}
-
-Soltanto ora è possibile installare ulteriori dipendenze senza che quest'ultime possano mai andare in conflitto tra diversi progetti eventualmente gestiti. Trovandosi ora in un ambiente virtuale chiuso, tutte le librerie installate da ora in poi saranno visibili esclusivamente nell'ambiente chiamato \quotes{cv}. Si procede dunque all'installazione di \textbf(OpenCV) per Python:
+Tutte le librerie installate a fronte delle operazioni appena citate sono di conseguenza visibili esclusivamente nell'ambiente \quotes{cv}. Si procede dunque all'installazione di \textit{OpenCV} per Python:
 \begin{lstlisting}
 pip install opencv-contrib-python
 \end{lstlisting}
 
-Ci sono diverse classi di appoggio sulle quali si possono effettuare operazioni di elaborazione di immagini. Si preferisce l'utilizzo della libreria \textit{imutils}, ricca di funzionalità e di facile utilizzo. La procedura d'installazione è la classica e prevede l'esecuzione del comando:
+\vspace{0.5cm}
+\textbf{Imutils}\\
+La procedura d'installazione della libreria \textit{imutils} (anch'essa descritta con maggior dettaglio nella sezione \ref{X}) è classica:
 \begin{lstlisting}
 pip install imutils
 \end{lstlisting}
 
-Infine, per poter utilizzare la RaspiCam direttamente in Python si utilizzerà una libreria di appoggio, installata tramite il seguente comando:
+\vspace{0.5cm}
+\textbf{Picamera}\\
+È una libreria di appoggio per l'uso della RaspiCam direttamente in Python, installabile tramite il seguente comando:
 \begin{lstlisting}
 pip install "picamera[array]"
 \end{lstlisting}
 
-Prima di procedere al vero e proprio sviluppo del progetto, viene consigliato di testare le librerie appena installate. Senza chiudere la finestra precedentemente aperta (oppure aprendone una nuova e rieseguendo i comandi per il cambio dell'ambiente virtuale)  si possono eseguire in ordine i comandi:
-\begin{python}
-python
-import cv2
-import imutils
-\end{python}
-
-Se tutto funziona correttamente e non vengono restituiti errori di nessun genere, si può procedere allo sviluppo e utilizzo completo delle librerie. Nel caso in cui i comandi di sopra producessero errori, si può procedere all'integrazione di alcune librerie probabilmente mancanti oppure provare a reinstallarle tutte dall'inizio su un nuovo ambiente virtuale, facendo molta attenzione all'ordine e all'effettivo completamento dell'installazione dei singoli pacchetti senza alcun genere di errore in output. Le eventuali librerie da aggiungere, nel caso di problemi, devono essere installati fuori dall'ambiente virtuale: è sufficiente aprire una nuova finestra di console ed eseguire uno ad uno i seguenti comandi:
-
-\begin{lstlisting}
-sudo apt-get install libatlas-base-dev
-sudo apt-get install libjasper-dev
-sudo apt-get install libqtgui4
-sudo apt-get install python3-pyqt5
-\end{lstlisting}
-
-Un'ulteriore libreria utilizzata nel progetto è Dlib; per essere pienamente operativa, essa ha prima bisogno di alcune dipendenze, reperibili tramite i seguenti comandi (lanciati \textbf{fuori} dall'ambiente virtuale di python):
+\vspace{0.5cm}
+\textbf{Dlib}\\
+Un'ulteriore libreria utilizzata nel progetto è \textit{Dlib}; per essere pienamente operativa, essa ha prima bisogno di alcune dipendenze, reperibili tramite i seguenti comandi (lanciati \underline{fuori} dall'ambiente virtuale di python):
 \begin{lstlisting}
 sudo apt-get install build-essential cmake
 sudo apt-get install libgtk-3-dev
 sudo apt-get install libboost-all-dev
 \end{lstlisting}
-
-Successivamente, grazie all'utilizzo di \quotes{PIP} si riescono a reperire tutte le altre dipendenze e la libreria Dlib. Per eseguire questi comandi è necessario trovarsi nell'ambiente virtuale di Python precedentemente configurato.
+Le ulteriori dipendenze e la libreria \textit{Dlib} stessa sono reperibili grazie all'utilizzo di \textit{pip}. Per eseguire questi comandi è necessario trovarsi nell'ambiente virtuale di Python precedentemente creato.
 \begin{lstlisting}
 pip install numpy
 pip install scipy
 pip install scikit-image
 \end{lstlisting}
 
+\vspace{0.5cm}
+Prima di procedere allo sviluppo vero e proprio del progetto, è consigliabile testare le librerie appena installate. Senza chiudere la finestra precedentemente aperta (oppure aprendone una nuova e rieseguendo i comandi per il cambio di ambiente virtuale) si possono eseguire in ordine i comandi:
+\begin{lstlisting}
+python
+import cv2
+import imutils
+\end{lstlisting}
+L'assenza di errori restituiti indica un'installazione avvenuta con successo. Se così non fosse, si può procedere all'integrazione di alcune librerie probabilmente mancanti oppure provare a ripetere l'installazione su un nuovo ambiente virtuale.
+
 \subsubsection{Ottimizzazione Utilizzo Risorse}
 
-Il progetto presenta numerose e complesse elaborazioni su immagini; avendo a disposizione un buon margine di memoria sulla MicroSD è consigliabile incrementare virtualmente la quantità della RAM disponibile, modificando opportunamente l'attuale configurazione di sistema. Uno dei modi per riservare una parte dello spazio presente sulla schedina è quello di incrementare la dimensione dello \quotes{swap file}. Questo può essere fatto lanciando come amministore il comando:
-
+Il progetto presenta numerose e complesse elaborazioni su immagini. Avendo a disposizione un buon margine di memoria sulla MicroSD è consigliabile incrementare virtualmente la quantità della RAM disponibile, modificando opportunamente l'attuale configurazione del sistema. Uno dei modi per riservare una parte dello spazio presente sulla scheda ai fini dell'elaborazione è quello di incrementare la dimensione dello \quotes{swap file}. Questo può essere fatto lanciando come amministratore il comando:
 \begin{lstlisting}
 sudo nano /etc/dphys-swapfile
 \end{lstlisting}
-e sostituendo alla stringa \quotes{CONF\_SWAPSIZE} il valore che si desidera assegnare al file di swap (espresso in megabyte). Nel progetto in questione si è scelto di dedicare un ulteriore gigabyte di spazio:
+e sostituendo alla stringa \quotes{CONF\_SWAPSIZE} il valore che si desidera assegnare al file di swap stesso (espresso in megabyte). Nel progetto in questione si è scelto di dedicare un ulteriore gigabyte di spazio:
 \begin{lstlisting}
 CONF_SWAPSIZE=1024
 \end{lstlisting}
-
-Un ulteriore cambiamento alle impostazioni del sistema, utile ad incrementare le performance e ricavare qualche megabyte di memoria, è di decrementare la RAM riservata ai calcoli della GPU, in quanto le elaborazioni effettuate si svolgeranno soltanto sulla CPU. Si può configurare il precedente parametro attraverso la configurazione del Raspberry, accessibile dal comando
+Un altro cambiamento alle impostazioni - utile a incrementare le performance e a ricavare qualche megabyte di memoria - riguarda la diminuzione della RAM riservata ai calcoli della GPU. Ciò è possibile dal momento che tutte le elaborazioni necessarie si svolgono proprio sulla CPU. Si può pertanto personalizzare tale parametro attraverso il menù dedicato alla configurazione del Raspberry, accessibile grazie al comando
 \begin{lstlisting}
 raspi-config
 \end{lstlisting}
-sotto la categoria \quotes{Advanced Options => Memory Split}. La dimensione impostata per questo progetto è stata di 16MB: quantità di memoria più che sufficiente per riuscire ad avviare il Raspberry anche in modalità desktop grafico.
+sotto la categoria \quotes{Advanced Options $\rightarrow$ Memory Split}. La dimensione impostata per questo progetto è stata di 16MB: quantità di memoria più che sufficiente per riuscire ad avviare il Raspberry anche in modalità desktop grafico. Per rendere operative le suddette modifiche, infine, è necessario eseguire il reboot.
 
-Per rendere operative le soprastanti modifiche, è necessario riavviare il Raspberry.
 
 %- OpenCV
 %- Python
@@ -707,7 +704,15 @@ Per rendere operative le soprastanti modifiche, è necessario riavviare il Raspb
 %- Fissaggio camera
 %- Script
 
+%\begin{python}
+%	python
+%	import cv2
+%	import imutils
+%\end{python}
+
 %EAR: media per due occhi
+
+% Ci sono diverse classi di appoggio sulle quali si possono effettuare operazioni di elaborazione di immagini. Si preferisce l'utilizzo della libreria \textit{imutils}, ricca di funzionalità e di facile utilizzo. La procedura d'installazione è la classica e prevede l'esecuzione del comando:
 
 %If a face is detected, then a region of interest in marked within the face. This region of interest contains the eyes. Defining a region of interest significantly reduces the computational requirements of the system. After that the eyes are detected from the region of interest.
 
