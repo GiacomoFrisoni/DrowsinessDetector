@@ -658,6 +658,7 @@ import imutils
 \end{python}
 
 Se tutto funziona correttamente e non vengono restituiti errori di nessun genere, si può procedere allo sviluppo e utilizzo completo delle librerie. Nel caso in cui i comandi di sopra producessero errori, si può procedere all'integrazione di alcune librerie probabilmente mancanti oppure provare a reinstallarle tutte dall'inizio su un nuovo ambiente virtuale, facendo molta attenzione all'ordine e all'effettivo completamento dell'installazione dei singoli pacchetti senza alcun genere di errore in output. Le eventuali librerie da aggiungere, nel caso di problemi, devono essere installati fuori dall'ambiente virtuale: è sufficiente aprire una nuova finestra di console ed eseguire uno ad uno i seguenti comandi:
+
 \begin{lstlisting}
 sudo apt-get install libatlas-base-dev
 sudo apt-get install libjasper-dev
@@ -665,7 +666,39 @@ sudo apt-get install libqtgui4
 sudo apt-get install python3-pyqt5
 \end{lstlisting}
 
+Un'ulteriore libreria utilizzata nel progetto è Dlib; per essere pienamente operativa, essa ha prima bisogno di alcune dipendenze, reperibili tramite i seguenti comandi (lanciati \textbf{fuori} dall'ambiente virtuale di python):
+\begin{lstlisting}
+sudo apt-get install build-essential cmake
+sudo apt-get install libgtk-3-dev
+sudo apt-get install libboost-all-dev
+\end{lstlisting}
 
+Successivamente, grazie all'utilizzo di \quotes{PIP} si riescono a reperire tutte le altre dipendenze e la libreria Dlib. Per eseguire questi comandi è necessario trovarsi nell'ambiente virtuale di Python precedentemente configurato.
+\begin{lstlisting}
+pip install numpy
+pip install scipy
+pip install scikit-image
+\end{lstlisting}
+
+\subsubsection{Ottimizzazione Utilizzo Risorse}
+
+Il progetto presenta numerose e complesse elaborazioni su immagini; avendo a disposizione un buon margine di memoria sulla MicroSD è consigliabile incrementare virtualmente la quantità della RAM disponibile, modificando opportunamente l'attuale configurazione di sistema. Uno dei modi per riservare una parte dello spazio presente sulla schedina è quello di incrementare la dimensione dello \quotes{swap file}. Questo può essere fatto lanciando come amministore il comando:
+
+\begin{lstlisting}
+sudo nano /etc/dphys-swapfile
+\end{lstlisting}
+e sostituendo alla stringa \quotes{CONF\_SWAPSIZE} il valore che si desidera assegnare al file di swap (espresso in megabyte). Nel progetto in questione si è scelto di dedicare un ulteriore gigabyte di spazio:
+\begin{lstlisting}
+CONF_SWAPSIZE=1024
+\end{lstlisting}
+
+Un ulteriore cambiamento alle impostazioni del sistema, utile ad incrementare le performance e ricavare qualche megabyte di memoria, è di decrementare la RAM riservata ai calcoli della GPU, in quanto le elaborazioni effettuate si svolgeranno soltanto sulla CPU. Si può configurare il precedente parametro attraverso la configurazione del Raspberry, accessibile dal comando
+\begin{lstlisting}
+raspi-config
+\end{lstlisting}
+sotto la categoria \quotes{Advanced Options => Memory Split}. La dimensione impostata per questo progetto è stata di 16MB: quantità di memoria più che sufficiente per riuscire ad avviare il Raspberry anche in modalità desktop grafico.
+
+Per rendere operative le soprastanti modifiche, è necessario riavviare il Raspberry.
 
 %- OpenCV
 %- Python
@@ -890,6 +923,74 @@ sudo apt-get install python3-pyqt5
 			\end{tabular}
 		\end{adjustbox}
 		\caption{Accuratezza del rilevatore di sonnolenza con $EAR_{th}=0.22$}
+		\label{table:test}
+	\end{table}
+\end{landscape}
+
+% TODO
+% DA CORREGGERE I VALORI DELLE FORMULE!!!
+% EAR = 0.3 ma solo Marcin!
+
+\begin{landscape}
+	\begin{table}[]
+		\centering
+		\begin{adjustbox}{width=1.4\textwidth}
+			\begin{tabular}{lllllllllllllccllll}
+				& & & & & & & & & & & & & \multicolumn{1}{l}{} & \multicolumn{1}{l}{} & & & &\\ \cline{5-19}
+				& & & \multicolumn{1}{l|}{} & \multicolumn{4}{c|}{Confusion Matrix} & \multicolumn{5}{c|}{Category Statistical Indices} & \multicolumn{3}{c|}{Daytime Statistical Indices} & \multicolumn{3}{c|}{Global Statistical Indices}\\ \hline
+				\multicolumn{4}{|c|}{Category} & \multicolumn{1}{l|}{TP} & \multicolumn{1}{l|}{TN} & \multicolumn{1}{l|}{FP} & \multicolumn{1}{l|}{FN} & \multicolumn{1}{l|}{Accuracy} & \multicolumn{1}{l|}{Precision} & \multicolumn{1}{l|}{MR} & \multicolumn{1}{l|}{TPR} & \multicolumn{1}{l|}{FPR} & \multicolumn{1}{c|}{Accuracy} & \multicolumn{1}{c|}{TPR} & \multicolumn{1}{l|}{FPR} & \multicolumn{1}{l|}{Accuracy} & \multicolumn{1}{l|}{TPR} & \multicolumn{1}{l|}{FPR}\\ \hline
+				\multicolumn{1}{|l|}{\multirow{4}{*}{Day}} & \multicolumn{1}{l|}{\multirow{2}{*}{Drowsiness}} & 
+				 \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static}  & \multicolumn{1}{l|}{918} & \multicolumn{1}{l|}{2237} & \multicolumn{1}{l|}{4} & \multicolumn{1}{l|}{421} & \multicolumn{1}{l|}{84,73} & \multicolumn{1}{l|}{79,78} & \multicolumn{1}{l|}{15,27} & \multicolumn{1}{l|}{75,27} & \multicolumn{1}{l|}{10,21} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{4-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{991} & \multicolumn{1}{l|}{2319} & \multicolumn{1}{l|}{43} & \multicolumn{1}{l|}{227} & \multicolumn{1}{l|}{92,46} & \multicolumn{1}{l|}{95,84} & \multicolumn{1}{l|}{7,54} & \multicolumn{1}{l|}{81,36} & \multicolumn{1}{l|}{1,82} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{2-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoDrowsiness}} & 
+				 \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{1790} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{98,06} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{1,94} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{1,94} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{1785} & \multicolumn{1}{l|}{5} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{96,46} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{3,54} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{3,54} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{1-16}
+				\multicolumn{1}{|l|}{\multirow{4}{*}{Night}} & \multicolumn{1}{l|}{\multirow{2}{*}{Drowsiness}} & 
+				 \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{957} & \multicolumn{1}{l|}{25} & \multicolumn{1}{l|}{808} & \multicolumn{1}{l|}{60,89} & \multicolumn{1}{l|}{61,81} & \multicolumn{1}{l|}{39,11} & \multicolumn{1}{l|}{22,54} & \multicolumn{1}{l|}{10,42} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{198} & \multicolumn{1}{l|}{972} & \multicolumn{1}{l|}{35} & \multicolumn{1}{l|}{585} & \multicolumn{1}{l|}{65,59} & \multicolumn{1}{l|}{51,64} & \multicolumn{1}{l|}{34,41} & \multicolumn{1}{l|}{33,26} & \multicolumn{1}{l|}{16,89} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{2-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoDrowsiness}} & 
+				 \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static}  & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{892} & \multicolumn{1}{l|}{3} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{86,15} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{13,85} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{13,58} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{895} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{67,43} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{32,57} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{32,57} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \hline
+				& & & & & & & & & & & & & \multicolumn{1}{l}{} & \multicolumn{1}{l}{} & & & &
+			\end{tabular}
+		\end{adjustbox}
+		\caption{Accuratezza del rilevatore di sonnolenza con $EAR_{th}=0.3$ solo per il soggetto MP}
+		\label{table:test}
+	\end{table}
+\end{landscape}
+
+% TODO
+% DA CORREGGERE I VALORI DELLE FORMULE!!!
+% EAR = 0.26 ma solo Giacomo!
+
+\begin{landscape}
+	\begin{table}[]
+		\centering
+		\begin{adjustbox}{width=1.4\textwidth}
+			\begin{tabular}{lllllllllllllccllll}
+				& & & & & & & & & & & & & \multicolumn{1}{l}{} & \multicolumn{1}{l}{} & & & &\\ \cline{5-19}
+				& & & \multicolumn{1}{l|}{} & \multicolumn{4}{c|}{Confusion Matrix} & \multicolumn{5}{c|}{Category Statistical Indices} & \multicolumn{3}{c|}{Daytime Statistical Indices} & \multicolumn{3}{c|}{Global Statistical Indices}\\ \hline
+				\multicolumn{4}{|c|}{Category} & \multicolumn{1}{l|}{TP} & \multicolumn{1}{l|}{TN} & \multicolumn{1}{l|}{FP} & \multicolumn{1}{l|}{FN} & \multicolumn{1}{l|}{Accuracy} & \multicolumn{1}{l|}{Precision} & \multicolumn{1}{l|}{MR} & \multicolumn{1}{l|}{TPR} & \multicolumn{1}{l|}{FPR} & \multicolumn{1}{c|}{Accuracy} & \multicolumn{1}{c|}{TPR} & \multicolumn{1}{l|}{FPR} & \multicolumn{1}{l|}{Accuracy} & \multicolumn{1}{l|}{TPR} & \multicolumn{1}{l|}{FPR}\\ \hline
+				\multicolumn{1}{|l|}{\multirow{8}{*}{Day}} & \multicolumn{1}{l|}{\multirow{4}{*}{Drowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{286} & \multicolumn{1}{l|}{2437} & \multicolumn{1}{l|}{69} & \multicolumn{1}{l|}{788} & \multicolumn{1}{l|}{66,40} & \multicolumn{1}{l|}{42,61} & \multicolumn{1}{l|}{33,60} & \multicolumn{1}{l|}{34,64} & \multicolumn{1}{l|}{19,99} & \multicolumn{1}{c|}{\multirow{8}{*}{87,57}} & \multicolumn{1}{c|}{\multirow{8}{*}{53,35}} & \multicolumn{1}{c|}{\multirow{8}{*}{6,85}} & \multicolumn{1}{c|}{\multirow{16}{*}{74,64}} & \multicolumn{1}{c|}{\multirow{16}{*}{43,66}} & \multicolumn{1}{c|}{\multirow{16}{*}{19,02}}\\ \cline{4-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{73} & \multicolumn{1}{l|}{1927} & \multicolumn{1}{l|}{21} & \multicolumn{1}{l|}{664} & \multicolumn{1}{l|}{75,72} & \multicolumn{1}{l|}{67,63} & \multicolumn{1}{l|}{24,28} & \multicolumn{1}{l|}{22,12} & \multicolumn{1}{l|}{4,00} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{3-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static}  & \multicolumn{1}{l|}{466} & \multicolumn{1}{l|}{1248} & \multicolumn{1}{l|}{9} & \multicolumn{1}{l|}{67} & \multicolumn{1}{l|}{84,73} & \multicolumn{1}{l|}{79,78} & \multicolumn{1}{l|}{15,27} & \multicolumn{1}{l|}{75,27} & \multicolumn{1}{l|}{10,21} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{4-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{-} & \multicolumn{1}{l|}{-} & \multicolumn{1}{l|}{-} & \multicolumn{1}{l|}{-} & \multicolumn{1}{l|}{-} & \multicolumn{1}{l|}{-} & \multicolumn{1}{l|}{-} & \multicolumn{1}{l|}{-} & \multicolumn{1}{l|}{-} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{2-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{\multirow{4}{*}{NoDrowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{2657} & \multicolumn{1}{l|}{28} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{89,01} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{10,99} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{10,99} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{4-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{1788} & \multicolumn{1}{l|}{2} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{97,71} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{2,30} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{2,30} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{3-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{892} & \multicolumn{1}{l|}{3} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{98,06} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{1,94} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{1,94} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{895} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{96,46} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{3,54} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{3,54} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{1-16}
+				\multicolumn{1}{|l|}{\multirow{8}{*}{Night}} & \multicolumn{1}{l|}{\multirow{4}{*}{Drowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{49} & \multicolumn{1}{l|}{1189} & \multicolumn{1}{l|}{12} & \multicolumn{1}{l|}{540} & \multicolumn{1}{l|}{74,97} & \multicolumn{1}{l|}{63,74} & \multicolumn{1}{l|}{25,03} & \multicolumn{1}{l|}{55,52} & \multicolumn{1}{l|}{15,49} & \multicolumn{1}{c|}{\multirow{8}{*}{61,70}} & \multicolumn{1}{c|}{\multirow{8}{*}{33,96}} & \multicolumn{1}{c|}{\multirow{8}{*}{31,18}} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{8} & \multicolumn{1}{l|}{1200} & \multicolumn{1}{l|}{170} & \multicolumn{1}{l|}{412} & \multicolumn{1}{l|}{27,65} & \multicolumn{1}{l|}{9,53} & \multicolumn{1}{l|}{72,35} & \multicolumn{1}{l|}{24,52} & \multicolumn{1}{l|}{71,39} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{3-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{170} & \multicolumn{1}{l|}{554} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{171} & \multicolumn{1}{l|}{60,89} & \multicolumn{1}{l|}{61,81} & \multicolumn{1}{l|}{39,11} & \multicolumn{1}{l|}{22,54} & \multicolumn{1}{l|}{10,42} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{36} & \multicolumn{1}{l|}{654} & \multicolumn{1}{l|}{80} & \multicolumn{1}{l|}{125} & \multicolumn{1}{l|}{65,59} & \multicolumn{1}{l|}{51,64} & \multicolumn{1}{l|}{34,41} & \multicolumn{1}{l|}{33,26} & \multicolumn{1}{l|}{16,89} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{2-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{\multirow{4}{*}{NoDrowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{1790} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{74,30} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{25,70} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{25,70} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{1374} & \multicolumn{1}{l|}{416} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{36,59} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{63,41} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{63,41} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{3-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static}  & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{895} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{86,15} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{13,85} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{13,58} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{4-13}
+				\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{710} & \multicolumn{1}{l|}{185} & \multicolumn{1}{l|}{0} & \multicolumn{1}{l|}{67,43} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{32,57} & \multicolumn{1}{l|}{/} & \multicolumn{1}{l|}{32,57} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \hline
+				& & & & & & & & & & & & & \multicolumn{1}{l}{} & \multicolumn{1}{l}{} & & & &
+			\end{tabular}
+		\end{adjustbox}
+		\caption{Accuratezza del rilevatore di sonnolenza con $EAR_{th}=0.26$ solo per soggetto GF}
 		\label{table:test}
 	\end{table}
 \end{landscape}
