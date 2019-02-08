@@ -709,7 +709,7 @@ sotto la categoria \quotes{Advanced Options $\rightarrow$ Memory Split}. La dime
 
 \subsubsection{OpenCV}
 \label{subsec:opencv}
-OpenCV è una libreria multipiattaforma di Computer Vision open source originariamente sviluppata da Intel, progettata per essere computazionalmente efficiente e utilizzabile da applicazioni real time. Essa consente di velocizzare e di semplificare lo sviluppo di applicazioni di visione. La struttura di OpenCV consta di 6 parti: CXCORE (strutture dati), CV (funzioni per il processing e analisi di immagini, calibrazione e pattern recognition), ML (machine learning), HighGUI (interfacce utenti), CVCAM (interfacce webcam) e CVAUX (algoritmi sperimentali). Nell'ambito dell'elaborato, è stata utilizzata per eseguire automaticamente l'operazione di \textit{face detection} (a partire dal caricamento della conoscenza in un classificatore a cascata), per elaborare efficientemente i frame acquisiti dalla camera con prestazioni real time e per visualizzare in output i risultati calcolati.
+OpenCV è una libreria multipiattaforma di Computer Vision open source originariamente sviluppata da Intel, progettata per essere computazionalmente efficiente e utilizzabile da applicazioni real time. Essa consente di velocizzare e di semplificare lo sviluppo di applicazioni di visione. La struttura di OpenCV consta di 6 parti: CXCORE (strutture dati), CV (funzioni per il processing e analisi di immagini, calibrazione e pattern recognition), ML (machine learning), HighGUI (interfacce utenti), CVCAM (interfacce webcam) e CVAUX (algoritmi sperimentali). Nell'ambito dell'elaborato, è stata utilizzata per eseguire automaticamente l'operazione di \textit{face detection} (a partire dal caricamento della conoscenza in un classificatore a cascata), per elaborare efficientemente i frame acquisiti dalla camera con prestazioni real time e per visualizzare in output i risultati calcolati. La scelta legata all'uso di OpenCV, in conclusione, deriva dalla sua completezza e convenienza.
 
 \subsubsection{Dlib}
 \label{subsec:dlib}
@@ -941,7 +941,7 @@ OpenCV è una libreria multipiattaforma di Computer Vision open source originari
 \end{landscape}
 
 
-% EAR = 0.30
+% EAR = 0.30 (Marcin)
 \begin{landscape}
 	\begin{table}[]
 		\centering
@@ -969,7 +969,7 @@ OpenCV è una libreria multipiattaforma di Computer Vision open source originari
 				& & & & & & & & & & & & & & & \multicolumn{1}{l}{} & \multicolumn{1}{l}{} & & & &
 			\end{tabular}
 		\end{adjustbox}
-		\caption{Accuratezza del rilevatore di sonnolenza con $EAR_{th}=0.3$}
+		\caption{Accuratezza del rilevatore di sonnolenza con $EAR_{th}=0.3$ solo utente MP}
 		\label{table:test}
 	\end{table}
 \end{landscape}
@@ -1029,19 +1029,29 @@ FPR = \frac{FP}{TN + FP} \times 100
 
 \begin{center}
 	\framebox{\begin{tikzpicture}
-		\begin{loglogaxis}[title={\textbf{ROC Curve}}, xlabel=Rate of False Positive (\%), ylabel=Rate of True Positive (\%), scale=1.5]
-		\addplot plot coordinates {
-			(43.66, 19.02)
-			(10, 2.547e-02)
-			(20, 7.407e-03)
-			(30, 2.102e-03)
-			(40, 5.874e-04)
-			(50, 1.623e-04)
-			(60, 4.442e-05)
-			(70, 1.207e-05)
-			(80, 3.261e-06) };
+		\begin{axis}[
+		title={\textbf{ROC Curve}},
+		width=0.8\textwidth,
+		height=0.6\textwidth,
+		axis x line=bottom,
+		xlabel near ticks,
+		xticklabel style={/pgf/number format/1000 sep=},
+		axis y line=left,
+		xmin=0,
+		xmax=20,
+		xlabel=Rate of False Positive (\%),
+		ymin=0,
+		ymax=50,
+		ylabel=Rate of True Positive (\%)
+		]
+		\addplot[color=blue,mark=x] coordinates {
+			(19.02, 43.66)
+			(8.84, 30.71)
+			(3.56, 22.33)
+			(0.97, 12.97)
+			(0.26, 8.29) };
 		\legend{DrowsinessDetector\\}
-		\end{loglogaxis}
+		\end{axis}
 	\end{tikzpicture}}
 \end{center}
 
