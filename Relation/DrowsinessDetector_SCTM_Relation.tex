@@ -379,7 +379,7 @@ Rilevare la presenza del volto del conducente e localizzarne la posizione all'in
 		\end{figure}
 		\vspace{0.5cm}
 		\item \textbf{HOG + Linear SVM\footnote{SVM. Support Vector Machine.}.}\\
-		L'idea base delle feature HOG\footnote{HOG. Histogram of Oriented Gradient.} è che la distribuzione dei gradienti di intensità locale o la direzione dei bordi possono caratterizzare bene l'aspetto e la forma di un oggetto o di un volto. L'algoritmo HOG conta le occorrenze dell'orientamento del gradiente in porzioni localizzate di un'immagine e si dimostra particolarmente utile per il riconoscimento di oggetti strutturati con parti deformabili. Similarmente a LBP, la rappresentazione dell'immagine è espressa come un istogramma combinato. Il metodo HOG è stato proposto per la prima volta da Navneet Dalal e Bill Triggs in un paper del 2005, dove venne dimostrato il suo uso abbinato con un SVM per l'addestramento di classificatori molto accurati.
+		L'idea base delle feature HOG\footnote{HOG. Histogram of Oriented Gradient.} è che la distribuzione dei gradienti di intensità locale o la direzione dei bordi possono caratterizzare bene l'aspetto e la forma di un oggetto o di un volto. L'algoritmo HOG conta le occorrenze dell'orientamento del gradiente in porzioni localizzate di un'immagine e si dimostra particolarmente utile per il riconoscimento di oggetti strutturati con parti deformabili. Similarmente a LBP, la rappresentazione dell'immagine è espressa come un istogramma combinato. Il metodo HOG è stato proposto per la prima volta da Navneet Dalal e Bill Triggs in un paper del 2005, dove venne dimostrato il suo uso abbinato con un SVM per l'addestramento di classificatori molto accurati\cite{Hog1}\cite{Hog2}.
 		\item \textbf{Localizzatori basati su Deep learning.}\\
 		Le CNN\footnote{CNN. Convolutional Neural Network.} costituiscono un approccio di deep learning in grado di realizzare il rilevamento facciale con un'accuratezza molto elevata, nonostante gli algoritmi richiedano un alto numero di dati per l'addestramento della rete neurale stessa. Secondariamente, localizzatori di questa tipologia necessitano di sistemi computazionali a elevate prestazioni per la costruzione del modello. Un'altra tecnica nota in letteratura per la localizzazione di volti, e in generale di oggetti, è SSD\footnote{SSD. Single Shot Detector.}.
 	\end{itemize}
@@ -499,43 +499,37 @@ Per il progetto in esame si è scelto di adottare EAR thresholding, a causa del 
 
 \subsection{Architettura software}
 
+In Figura \ref{fig:flowchart} è riportato il flowchart illustrante l'esecuzione step-by-step (nelle sue parti principali) dell'algoritmo proposto, così come pensato in fase di progettazione.
 \begin{figure}[!htb]
 	\centering
 	\includegraphics[scale=0.58]{eps/flowchart.eps}
-	\caption{Flowchart dell'algoritmo}
+	\caption{Flowchart dell'algoritmo.}
 	\label{fig:flowchart}
 \end{figure}
+Il sistema è avviato con il boot di Raspberry Pi e, in seguito a questa fase, l'esecuzione del programma ha inizio automaticamente. Come già descritto nella sezione \ref{sec:requisiti}, l'accensione e lo spegnimento del rilevatore di sonnolenza è regolato mediante la pressione di un pulsante. Con l'attivazione del rilevatore, la camera (posizionata frontalmente al conducente) comincia la cattura dello stream video. Su ogni frame sono poi svolte delle operazioni di preprocessing per la successiva fase di localizzazione del volto. Se nessun volto è rilevato, l'algoritmo passa alla lettura del successivo frame (qualora il rilevatore risulti ancora attivo). In caso di rilevamento di un volto, invece, si procede all'individuazione dei punti di riferimento facciali all'interno della regione ottenuta (mediante \textit{shape predictor}). A partire dalle 12 coordinate estratte (6 per ogni occhio), si procede al calcolo dell'EAR. Se il valore dell'EAR risulta inferiore alla soglia fissata (il cui valore sarà stabilito dopo un'opportuna fase di test coinvolgente più utenti e scenari d'uso), gli occhi nel frame corrente sono considerati chiusi e un contatore viene incrementato. Quando gli occhi sono chiusi per un certo numero di frame consecutivi (il cui valore sarà sempre frutto di sperimentazioni finalizzate all'individuazione di una valida sensibilità), il conducente è ritenuto assonnato e l'allarme (sia visivo che sonoro) viene conseguentemente azionato. In ogni caso, si procede con l'analisi del successivo frame. Il contatore e l'allarme vengono sottoposti a reset solo nel caso in cui l'EAR calcolato non sia inferiore alla soglia (occhi aperti) o il pulsante per la disattivazione del rilevatore sia premuto dall'utente. In quest'ultimo caso viene anche arrestato lo streaming video dalla camera.
 
 \subsection{Architettura fisica}
-
+In Figura \ref{fig:circuit} è riportato lo schema circuitale.
 \begin{figure}[!htb]
 	\centering
 	\includegraphics[scale=0.27]{eps/circuit.eps}
-	\caption{Schema circuitale del progetto}
+	\caption{Schema circuitale del progetto, disegnato con Fritzing\cite{Fritzing}.}
 	\label{fig:circuit}
 \end{figure}
 
-\iffalse
+I componenti hardware adottati per quanto concerne la costruzione del circuito sono:
+\begin{itemize}
+	\item 1 x Raspberry Pi 3 B
+	\item 1 x RaspiCam v 1.3
+	\item 1 x Buzzer attivo basso 3.3V-5V
+	\item 1 x Pulsante tattile
+	\item 3 x LED (1 verde, 1 giallo, 1 rosso)
+	\item 3 x Resistenza 300$\Omega$
+	\item 1 x Breadboard
+	\item Cavetti di collegamento F-M e M-M
+\end{itemize}
 
-- flowchart
-- face detection
-	- Viola-Jones
-	- LBP
-	- HOG
-	- perchè non Deep Learning / CNN e LGBP
-	- input del modello per il rilevamento del volto
-- facial landmark detection
-- EAR
-	- perchè non PERCLOS
-	- perchè non template matching
-	- importanza blink detection
-	- eye blinking (tempi e osservazioni)
-	- EAR threshold
-	- EAR SVM
-	- EAR con HMM
-	- perchè usare EAR con threshold
-	- numero di frame consecutivi
-- circuito fritzing
+\iffalse
 
 Devono essere esposte le scelte progettuali operate nelle varie fasi di sviluppo dell'elaborato.\\
 
@@ -680,6 +674,10 @@ sudo apt-get install python3-pyqt5
 %- Fissaggio camera
 %- Script
 
+%EAR: media per due occhi
+
+%If a face is detected, then a region of interest in marked within the face. This region of interest contains the eyes. Defining a region of interest significantly reduces the computational requirements of the system. After that the eyes are detected from the region of interest.
+
 %Noi utilizziamo la libreria Dlib a questo scopo, la quale fornisce un \textit{facial landmark detector} già addestrato (basato su HOG e SVM).
 
 %Esporre i principali problemi affrontati durante l'effettiva realizzazione delle componenti hardware/software e illustrare le soluzioni implementative adottate. Se l'elaborato ha previsto l'utilizzo di tecnologie già disponibili sul mercato, discuterne brevemente le caratteristiche e motivarne l'adozione rispetto ad altre soluzioni assimilabili.\\
@@ -730,7 +728,7 @@ sudo apt-get install python3-pyqt5
 		& & & & & & & & & & & & & \multicolumn{1}{l}{} & \multicolumn{1}{l}{} & & & &\\ \cline{5-19}
 		& & & \multicolumn{1}{l|}{} & \multicolumn{4}{c|}{Confusion Matrix} & \multicolumn{5}{c|}{Category Statistical Indices} & \multicolumn{3}{c|}{Daytime Statistical Indices} & \multicolumn{3}{c|}{Global Statistical Indices}\\ \hline
 		\multicolumn{4}{|c|}{Category} & \multicolumn{1}{l|}{TP} & \multicolumn{1}{l|}{TN} & \multicolumn{1}{l|}{FP} & \multicolumn{1}{l|}{FN} & \multicolumn{1}{l|}{Accuracy} & \multicolumn{1}{l|}{Precision} & \multicolumn{1}{l|}{MR} & \multicolumn{1}{l|}{TPR} & \multicolumn{1}{l|}{FPR} & \multicolumn{1}{c|}{Accuracy} & \multicolumn{1}{c|}{TPR} & \multicolumn{1}{l|}{FPR} & \multicolumn{1}{l|}{Accuracy} & \multicolumn{1}{l|}{TPR} & \multicolumn{1}{l|}{FPR}\\ \hline
-		\multicolumn{1}{|l|}{\multirow{8}{*}{Day}} & \multicolumn{1}{l|}{\multirow{4}{*}{Drowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{372} & \multicolumn{1}{l|}{2005} & \multicolumn{1}{l|}{501} & \multicolumn{1}{l|}{702} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{\multirow{16}{*}{}} & \multicolumn{1}{l|}{\multirow{16}{*}{}} & \multicolumn{1}{l|}{\multirow{16}{*}{}}\\ \cline{4-13}
+		\multicolumn{1}{|l|}{\multirow{8}{*}{Day}} & \multicolumn{1}{l|}{\multirow{4}{*}{Drowsiness}} & \multicolumn{1}{l|}{\multirow{2}{*}{Glasses}} & \multicolumn{1}{l|}{Static} & \multicolumn{1}{l|}{372} & \multicolumn{1}{l|}{2005} & \multicolumn{1}{l|}{501} & \multicolumn{1}{l|}{702} & \multicolumn{1}{l|}{66,40} & \multicolumn{1}{l|}{42,61} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{c|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{\multirow{8}{*}{}} & \multicolumn{1}{l|}{\multirow{16}{*}{}} & \multicolumn{1}{l|}{\multirow{16}{*}{}} & \multicolumn{1}{l|}{\multirow{16}{*}{}}\\ \cline{4-13}
 		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{163} & \multicolumn{1}{l|}{1870} & \multicolumn{1}{l|}{78} & \multicolumn{1}{l|}{574} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{3-13}
 		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{\multirow{2}{*}{NoGlasses}} & \multicolumn{1}{l|}{Static}  & \multicolumn{1}{l|}{1409} & \multicolumn{1}{l|}{3141} & \multicolumn{1}{l|}{357} & \multicolumn{1}{l|}{463} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{}\\ \cline{4-13}
 		\multicolumn{1}{|l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{Dynamic} & \multicolumn{1}{l|}{991} & \multicolumn{1}{l|}{2319} & \multicolumn{1}{l|}{43} & \multicolumn{1}{l|}{227} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} & \multicolumn{1}{l|}{} \\ \cline{2-13}
