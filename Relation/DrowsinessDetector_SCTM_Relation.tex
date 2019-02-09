@@ -245,6 +245,7 @@ In questa sezione sono trattati in modo dettagliato tutti i requisiti del proget
 	\begin{enumerate}
 		\item Volto rilevato. Il sistema deve procedere con la misura dell'indice di sonnolenza.
 		\item Volto non rilevato. Il sistema non deve produrre allarmi, evitando segnalazioni potenzialmente non connesse a situazioni di reale pericolosità.
+		\item Volto non rilevato, sonnolenza precedentemente rilevata. Il sistema continua a produrre allarmi nel caso in cui ha rilevato la sonnolenza nel soggetto prima di perdere traccia del suo volto.
 	\end{enumerate}
 	\item Segnalazione acustica e visiva degli scenari di pericolo rilevati.
 \end{enumerate}
@@ -259,7 +260,13 @@ In questa sezione sono trattati in modo dettagliato tutti i requisiti del proget
 		\item Il sistema deve rilevare la chiusura degli occhi nei vari frame grazie al calcolo dell'EAR per ognuno di essi.
 		\item Si considera la presenza di uno scenario di pericolo nel momento in cui la misura dell'EAR indica la chiusura degli occhi per un definito numero di frame consecutivi, ritenuto di adatta sensibilità per gli obiettivi del sistema.
 	\end{enumerate}
-	\item Il sistema deve avviare il software di rilevamento nella fase di reboot.
+	\item Il sistema deve avviare il software di rilevamento nella fase di reboot, indicando opportunamente, tramite segnali luminosi, lo stato in cui si trova:
+	\begin{enumerate}		
+		\item Loading (LED giallo acceso). Il sistema è in fase di caricamento, non è possibile interagire con esso.
+		\item Ready (LED verde acceso). Il sistema è pronto a ricevere l'input dal conducente.
+		\item Working (LED videocamera acceso). Il sistema sta acquisendo ed analizzando le immagini per la rilevazione dei colpi di sonno.
+		\item Alert (LED rosso acceso). Il sistema ha rilevato una potenziale situazione di pericolo.
+	\end{enumerate}
 	\item Il sistema deve consentire l'avvio o l'arresto della rilevazione mediante la pressione di un pulsante.
 	\begin{enumerate}
 		\item L'acquisizione dei frame dalla camera e la loro successiva elaborazione devono avvenire solo se il sistema è attivo.
@@ -268,11 +275,12 @@ In questa sezione sono trattati in modo dettagliato tutti i requisiti del proget
 	\begin{enumerate}
 		\item Volto rilevato. Il sistema deve procedere con l'estrazione dei facial landmark e il calcolo dell'EAR per entrambi gli occhi.
 		\item Volto non rilevato. Il sistema deve procedere con l'analisi dei successivi frame, senza segnalare situazioni di pericolo.
+		\item Volto non rilevato, sonnolenza precedentemente rilevata. Il sistema deve procedere a segnalare la situazione di pericolo rilevata prima di perdere traccia del volto.
 	\end{enumerate}
 	\item Il sistema deve segnalare al conducente la presenza di uno scenario di pericolo causato dal rilevamento di sonnolenza, adottando due tipologie distinte di avvertimento.
 	\begin{enumerate}
 		\item Avvertimento acustico, per mezzo di un buzzer sonoro.
-		\item Avvertimento visivo, per mezzo di LED.
+		\item Avvertimento visivo, per mezzo di un LED.
 	\end{enumerate}
 \end{enumerate}
 
