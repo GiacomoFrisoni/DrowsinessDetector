@@ -710,7 +710,7 @@ Python è utilizzato come principale linguaggio di programmazione. Esso, nello s
 
 \subsubsection{OpenCV}
 \label{subsec:opencv}
-OpenCV è una libreria multipiattaforma di Computer Vision open source originariamente sviluppata da Intel, progettata per essere computazionalmente efficiente e utilizzabile da applicazioni real time. Essa consente di velocizzare e di semplificare lo sviluppo di applicazioni di visione. La struttura di OpenCV consta di 6 parti: CXCORE (strutture dati), CV (funzioni per il processing e analisi di immagini, calibrazione e pattern recognition), ML (machine learning), HighGUI (interfacce utenti), CVCAM (interfacce webcam) e CVAUX (algoritmi sperimentali). Nell'ambito dell'elaborato, è stata utilizzata per eseguire automaticamente l'operazione di \textit{face detection} (a partire dal caricamento della conoscenza in un classificatore a cascata), per elaborare efficientemente i frame acquisiti dalla camera con prestazioni real time e per visualizzare in output i risultati calcolati. La scelta legata all'uso di OpenCV, in conclusione, deriva dalla sua completezza e convenienza.
+OpenCV\cite{OpenCV} è una libreria multipiattaforma di Computer Vision open source originariamente sviluppata da Intel, progettata per essere computazionalmente efficiente e utilizzabile da applicazioni real time. Essa consente di velocizzare e di semplificare lo sviluppo di applicazioni di visione. La struttura di OpenCV consta di 6 parti: CXCORE (strutture dati), CV (funzioni per il processing e analisi di immagini, calibrazione e pattern recognition), ML (machine learning), HighGUI (interfacce utenti), CVCAM (interfacce webcam) e CVAUX (algoritmi sperimentali). Nell'ambito dell'elaborato, è stata utilizzata per eseguire automaticamente l'operazione di \textit{face detection} (a partire dal caricamento della conoscenza in un classificatore a cascata), per elaborare efficientemente i frame acquisiti dalla camera con prestazioni real time e per visualizzare in output i risultati calcolati. La scelta legata all'uso di OpenCV, in conclusione, deriva dalla sua completezza e convenienza.
 
 \subsubsection{Dlib}
 \label{subsec:dlib}
@@ -719,6 +719,8 @@ Relativamente all'elaborato, la libreria Dlib è stata scelta in quanto fornisce
 
 \subsubsection{Imutils}
 \label{subsec:imutils}
+Imutils\cite{Imutils} è una libreria open source mantenuta dalla community di \textit{pyimagesearch}\cite{Pyimagesearch} (noto blog dedicato alla Computer Vision e realizzato da Adrian Rosebrock). Essa contiene una serie di funzioni di utilità per l'elaborazione di immagini (come traslazione, rotazione, ridimensionamento) finalizzate a semplificare il lavoro con OpenCV e Python. All'interno dell'elaborato è stata utilizzata per leggere i frame catturati dalla RaspiCam (\textit{VideoStream}), per semplificare l'accesso ai landmark degli occhi restituiti da Dlib e per compiere operazioni di resizing con mantenimento dell'aspect ratio.
+
 
 
 %- Fissaggio camera
