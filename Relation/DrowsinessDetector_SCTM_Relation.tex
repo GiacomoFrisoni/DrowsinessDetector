@@ -439,6 +439,7 @@ A seguito dello studio appena presentato (i cui risultati sono riassunti in Tabe
 \end{table}
 
 \subsubsection{Rilevamento dei punti di riferimento facciali}
+\label{subsubsec:facial_landmarks}
 
 Dopo la localizzazione del volto (che da un punto di vista pratico fornisce il rettangolo all'interno del quale è collocato il viso del conducente), è applicato lo step di rilevamento degli occhi. Questo passaggio fornisce la base strutturale per la successiva estrazione di misure di sonnolenza. La localizzazione degli occhi è realizzata attraverso l'estrazione di \textit{facial landmark}. L'obiettivo è quello di individuare i punti di riferimento facciali di maggior importanza in ogni frame (es. occhi, naso, bocca, mento, sopracciglia), adottando metodi di previsione di forma (\textit{shape predictor}). Ciò è realizzato utilizzando una forma di mark-up consistente di diversi punti salienti, che viene adattata alla reale immagine del viso. Per stimare l'allineamento tra i punti del volto di mark-up e i punti di quello reale ci sono due principali categorie di approcci che possono essere adottati.
 \begin{itemize}
@@ -705,7 +706,20 @@ sotto la categoria \quotes{Advanced Options $\rightarrow$ Memory Split}. La dime
 \subsection{Tecnologie}
 
 \subsubsection{Python}
-
+Python Language is used as main codding language.
+Python is an object-oriented programming language
+created by Guido Rossum in 1989. It is ideally designed for
+rapid prototyping of complex applications. It has interfaces to
+many OS system calls and libraries and is extensible to C or
+C++. Many large companies use the Python programming
+language include NASA, Google, YouTube, BitTorrent, etc.
+Python is widely used in Artificial Intelligence, Natural
+Language Generation, Neural Networks and other advanced
+fields of Computer Science. Python had deep focus on code
+readability. Python language is used by author due to his cross
+platform compatibility as main coding language for algorithm.
+Open CV and Dlib libraries are integrated in python
+interpreter for using readymade optimized functions.
 
 \subsubsection{OpenCV}
 \label{subsec:opencv}
@@ -713,6 +727,8 @@ OpenCV è una libreria multipiattaforma di Computer Vision open source originari
 
 \subsubsection{Dlib}
 \label{subsec:dlib}
+Dlib\cite{Dlib} è un moderno toolkit C++ che contiene algoritmi e strumenti di machine learning per creare software complessi al fine di risolvere problemi del mondo reale. È utilizzato sia nell'industria che nel mondo accademico in una vasta gamma di domini, tra cui la robotica, i dispositivi embedded, i telefoni cellulari e gli ambienti di elaborazione ad alte prestazioni e di grandi dimensioni. La licenza open source di Dlib consente di utilizzarlo in qualsiasi applicazione, gratuitamente.\\
+Relativamente all'elaborato, la libreria Dlib è stata scelta in quanto fornisce uno \textit{shape predictor}\cite{DlibShapePredictor} - già addestrato e altamente ottimizzato - basato su una rete neurale e facente uso di HOG + SVM nella procedura. Tale \textit{shape predictor} implementa la strategia di allineamento con funzioni di regressione in cascata (già citata nella sezione \ref{subsubsec:facial_landmarks}) ed è utilizzabile per l'individuazione di \textit{facial landmark} a 68 punti (da cui procedere per il calcolo dell'EAR).
 
 \subsubsection{Imutils}
 \label{subsec:imutils}
@@ -729,11 +745,15 @@ OpenCV è una libreria multipiattaforma di Computer Vision open source originari
 
 %EAR: media per due occhi
 
+%Dlib, a crossplatform software library equipped with machine learning toolkits was used for this purpose. Dlib recognizes eyes by identifying six defining coordinates as shown.
+
+%The shape predictor identifies 68 landmarks on a face and assigns coordinates to each of them with respect to the bounding box of the face. These individual coordinates can be extracted from the created “shape” object as NumPy arrays. Using Dlib‘s coordinates for the left and right eyes, it is possible to highlight the eyes alone, so that a live stream will capture each frame and mark the contours of the eyes corresponding to the upper and lower lids
+
+% dlib’s 68 facial landmarks are indexable which enables us to extract the various facial structures using simple Python array slices.
+
 % Ci sono diverse classi di appoggio sulle quali si possono effettuare operazioni di elaborazione di immagini. Si preferisce l'utilizzo della libreria \textit{imutils}, ricca di funzionalità e di facile utilizzo. La procedura d'installazione è la classica e prevede l'esecuzione del comando:
 
 %If a face is detected, then a region of interest in marked within the face. This region of interest contains the eyes. Defining a region of interest significantly reduces the computational requirements of the system. After that the eyes are detected from the region of interest.
-
-%Noi utilizziamo la libreria Dlib a questo scopo, la quale fornisce un \textit{facial landmark detector} già addestrato (basato su HOG e SVM).
 
 %Esporre i principali problemi affrontati durante l'effettiva realizzazione delle componenti hardware/software e illustrare le soluzioni implementative adottate. Se l'elaborato ha previsto l'utilizzo di tecnologie già disponibili sul mercato, discuterne brevemente le caratteristiche e motivarne l'adozione rispetto ad altre soluzioni assimilabili.\\
 
@@ -761,6 +781,12 @@ OpenCV è una libreria multipiattaforma di Computer Vision open source originari
 %----------------------------------------------------------------------------------------
 
 \section{Testing e performance}
+
+% pose testa (However, the Dlib Framework is not able to detect different positions of the driver's face such as turning the head completely right or left. In this case, these images are removed from the used dataset.)
+% posizionamento camera
+% dataset (raccolta video, struttura e nomenclatura)
+% Haar vs LBP
+% For most of the subjects who wore glasses, negligible accuracy values were observed. This can be attributed to the fact that the Dlib shape predictor library often mistakes the upper boundaries of the lenses as the upper eyelids. This phenomenon was observed multiple times during testing. For example, in the case of one subject, we could easily perceive the upper contour settling over the upper boundary of the lens just a few frames into the video stream.
 
 \begin{table}[h]
 	\centering
