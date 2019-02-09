@@ -894,13 +894,7 @@ Calcolato l'EAR si prosegue con la sua comparazione rispetto al valore di soglia
 
 \subsection{Lancio dello script in fase di reboot}
 % TO DO
-a\\
-b\\
-c\\
-d\\
-f\\
-g\\
-h\\
+Per poter lanciare uno script all'avvio del Raspberry è sufficiente creare un file bash (\texttt{.sh}) contenente tutti i comandi. E' importante usare il puntamento assoluto, oppure relativo, previo uso del comando \texttt{cd} ed è necessario concedere al file i permessi di esecuzione. Si esegue poi \texttt{sudo crontab -e} per aggiungere in fondo una riga: \texttt{@reboot /percorso/file/<file>.sh}. In questo modo il file verrà eseguito ad ogni avvio, permettendo, per esempio un'impostazione corretta dei pin o l'esecuzione immediata di un applicativo.
 
 
 \iffalse
