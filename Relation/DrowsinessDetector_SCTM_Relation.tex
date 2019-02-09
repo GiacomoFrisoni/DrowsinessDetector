@@ -11,8 +11,25 @@
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%libreria per il disegno di curve 2D
+\usepackage{tikz}
 \usepackage{pgfplots}
 \pgfplotsset{compat=newest}
+\pgfplotsset{compat=1.11,
+	/pgfplots/ybar legend/.style={
+		/pgfplots/legend image code/.code={%
+			\draw[##1,/tikz/.cd,yshift=-0.25em, xshift=0em]
+			(0cm,0cm) rectangle (4pt,0.8em);},
+	},
+}
+
+\usetikzlibrary{shapes,arrows,positioning,fit,patterns,fillbetween}
+
+% Define bar chart colors
+%
+\definecolor{bblue1}{HTML}{ABBFD7}
+\definecolor{bblue2}{HTML}{4F81BD}
+\definecolor{ppurple1}{HTML}{BE94AC}
+\definecolor{ppurple2}{HTML}{7D2A5A}
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%libreria per l'uso del multiriga nelle tabelle
@@ -1180,6 +1197,69 @@ FPR = \frac{FP}{TN + FP} \times 100
 		\end{axis}
 	\end{tikzpicture}}
 \end{center}
+
+
+\begin{figure}[!htb]
+	\centering
+	\begin{tikzpicture}
+		\begin{axis}[
+			width  = 0.85*\textwidth,
+			height = 13cm,
+			major x tick style = transparent,
+			ybar=3*\pgflinewidth,
+			bar width=14pt,
+			ymajorgrids = true,
+			ylabel = {Run time speed},
+			symbolic x coords={MP, GF},
+			yticklabel style={
+				/pgf/number format/fixed,
+				/pgf/number format/precision=2
+			},
+			ytick = {0.02,0.04,0.06,0.08,0.10,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28,0.30,0.32,0.34,0.36,0.38,0.40},
+			xtick = data,
+			scaled y ticks = false,
+			enlarge x limits=0.5,
+			ymin=0,
+			legend style={
+				at={(0.5,-0.1)},
+				anchor=north,
+				draw=none,
+				fill=none,
+				legend columns=1,
+				column sep=5pt
+			},
+		]
+		
+		%Max EAR Open
+		\addplot[style={bblue1,fill=bblue1,mark=none}]
+		coordinates {(MP,0.36) (GF,0.30)};	
+		
+		%Max EAR Closed
+		\addplot[style={ppurple2,fill=ppurple2,mark=none}]
+		coordinates {(MP,0.26) (GF,0.20)};
+		
+		%Min EAR Open MP
+		\node[
+		draw=none,
+		anchor=south east,
+		fill=bblue2,
+		minimum width=14pt,
+		minimum height=230pt,
+		xshift=-0.5pt]{};
+		
+		%Min EAR Open GF
+		\node[
+		draw=none,
+		anchor=south east,
+		fill=bblue2,
+		minimum width=14pt,
+		minimum height=180pt,
+		xshift=155pt]{};	
+		
+		\legend{EAR range with open eyes, Max EAR with closed eyes}
+		\end{axis}
+	\end{tikzpicture}
+\end{figure}
 
 \iffalse
 - orientamento testa
