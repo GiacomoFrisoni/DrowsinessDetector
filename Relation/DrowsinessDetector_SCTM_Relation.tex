@@ -893,8 +893,19 @@ Calcolato l'EAR si prosegue con la sua comparazione rispetto al valore di soglia
 \end{figure}
 
 \subsection{Lancio dello script in fase di reboot}
-% TO DO
-Per poter lanciare uno script all'avvio del Raspberry è sufficiente creare un file bash (\texttt{.sh}) contenente tutti i comandi. E' importante usare il puntamento assoluto, oppure relativo, previo uso del comando \texttt{cd} ed è necessario concedere al file i permessi di esecuzione. Si esegue poi \texttt{sudo crontab -e} per aggiungere in fondo una riga: \texttt{@reboot /percorso/file/<file>.sh}. In questo modo il file verrà eseguito ad ogni avvio, permettendo, per esempio un'impostazione corretta dei pin o l'esecuzione immediata di un applicativo.
+Per poter utilizzare il rilevatore di sonnolenza direttamente all'interno di un autoveicolo (rendendo sufficiente la sua sola alimentazione), occorre lanciare lo script al reboot del Raspberry Pi. A tal scopo è sufficiente creare un file bash (\texttt{.sh}) contenente i comandi da eseguire all'avvio. Successivamente è necessario concedere a tale file i permessi di esecuzione.
+\begin{lstlisting}
+chmod +x on_reboot.sh
+\end{lstlisting}
+Si esegue poi
+\begin{lstlisting}
+sudo crontab -e
+\end{lstlisting}
+per aggiornare il file \textit{crontab}, aggiungendo in coda la riga
+\begin{lstlisting}
+@reboot /percorso\_file/<file>.sh
+\end{lstlisting}
+Così facendo il file verrà automaticamente eseguito a ogni avvio, permettendo, ad esempio, l'esecuzione immediata di \texttt{drowsiness\_stream\_detector.py} e un'impostazione corretta dei pin.
 
 
 \iffalse
