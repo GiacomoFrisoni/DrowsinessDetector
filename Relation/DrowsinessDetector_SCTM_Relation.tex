@@ -324,6 +324,7 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 %----------------------------------------------------------------------------------------
 
 \section{Progettazione}
+\label{sec:progettazione}
 
 In questa sezione sono esposte le scelte progettuali operate nelle varie fasi di sviluppo dell'elaborato.
 
@@ -332,6 +333,7 @@ In questa sezione sono esposte le scelte progettuali operate nelle varie fasi di
 La metodologia alla base del progetto si compone di tre parti fondamentali: (1) rilevamento del volto (\textit{face detection}), (2) rilevamento dei punti di riferimento facciali (\textit{facial landmark detection}) e (3) rilevamento della sonnolenza. Ciascuno di questi problemi può essere affrontato con diversi approcci risolutori noti in letteratura. Dal momento che ogni tecnica possiede sia aspetti positivi che negativi, la scelta di quale adottare per il problema di riferimento deve essere frutto di un'attenta analisi in funzione dei requisiti che si devono soddisfare (già evidenziati nella sezione \ref{sec:requisiti}). La valutazione e lo studio delle soluzioni che possono essere intraprese nelle fasi metodologiche costituiscono pertanto due elementi chiave per una valida progettazione. Esse assumono inoltre un ruolo preponderante nella determinazione del successo o del fallimento degli obiettivi stabiliti dall'elaborato stesso. Nei successivi paragrafi si discutono in maggior dettaglio le problematiche emerse sul piano progettuale e si giustificano le scelte intraprese.
 
 \subsubsection{Rilevamento del volto}
+\label{subsubsec:face_detection}
 
 Rilevare la presenza del volto del conducente e localizzarne la posizione all'interno di un'immagine rappresenta un'operazione centrale in tutti i progetti di \textit{drowsiness detection} basati su misure comportamentali e, quindi, algoritmi principalmente connessi alla Computer Vision. I localizzatori allo stato dell'arte più utilizzati in letteratura e considerati d'interesse ai fini del progetto sono di seguito riportati, classificandoli nelle due principali famiglie con cui possono essere distinti.
 \begin{itemize}
@@ -543,6 +545,8 @@ I componenti hardware adottati per quanto concerne la costruzione del circuito s
 
 La camera board per Raspberry Pi è basata sul CMOS a colori OV5647, un sensore a 5MPixel con lenti 3.6mm F/2.0 fixed-focus in grado di fornire immagini con risoluzione massima di 2592x1944 e video 1080p30. Le dimensioni sono ridotte (21.6mm x 25mm) e la connessione avviene collegando il cavo flat al connettore CSI del Raspberry.
 
+% MODE BCM
+
 \iffalse
 
 Devono essere esposte le scelte progettuali operate nelle varie fasi di sviluppo dell'elaborato.\\
@@ -611,7 +615,7 @@ curl -L https://code.headmelted.com/installers/apt.sh
 
 \vspace{0.5cm}
 \textbf{OpenCV}\\
-È una libreria software open source (discussa più approfonditamente nella successiva sezione \ref{subsec:opencv}).
+È una libreria software open source (discussa più approfonditamente nel successivo paragrafo \ref{subsec:opencv}).
 Essa è disponibile in una versione ad hoc ottimizzata per dispositivi con ridotta capacità di calcolo, come Raspberry Pi. Per poterla utilizzare è necessario però installare alcune dipendenze, quali ad esempio \textit{libhdf5-dev}, \textit{libhdf5-serial-dev}, \textit{libqtwebkit4}, \textit{libqt4-test}, il package manager di Python e il gestore degli ambienti virtuali di Python. Le dipendenze in oggetto sono facilmente ottenibili tramite l'esecuzione di pochi comandi:
 \begin{lstlisting}
 sudo apt-get install libhdf5-dev libhdf5-serial-dev
@@ -655,7 +659,7 @@ pip install opencv-contrib-python
 
 \vspace{0.5cm}
 \textbf{Imutils}\\
-La procedura d'installazione della libreria \textit{imutils} (anch'essa descritta con maggior dettaglio nella sezione \ref{subsec:imutils}) è classica:
+La procedura d'installazione della libreria \textit{imutils} (anch'essa descritta con maggior dettaglio nel paragrafo \ref{subsec:imutils}) è classica:
 \begin{lstlisting}
 pip install imutils
 \end{lstlisting}
@@ -673,7 +677,7 @@ raspistill -o image.jpg
 
 \vspace{0.5cm}
 \textbf{Dlib}\\
-Un'ulteriore libreria utilizzata nel progetto è \textit{Dlib} (sezione \ref{subsec:dlib}); per essere pienamente operativa, essa ha prima bisogno di alcune dipendenze, reperibili tramite i seguenti comandi (lanciati \underline{fuori} dall'ambiente virtuale di python):
+Un'ulteriore libreria utilizzata nel progetto è \textit{Dlib} (paragrafo \ref{subsec:dlib}); per essere pienamente operativa, essa ha prima bisogno di alcune dipendenze, reperibili tramite i seguenti comandi (lanciati \underline{fuori} dall'ambiente virtuale di python):
 \begin{lstlisting}
 sudo apt-get install build-essential cmake
 sudo apt-get install libgtk-3-dev
@@ -714,7 +718,7 @@ sotto la categoria \quotes{Advanced Options $\rightarrow$ Memory Split}. La dime
 \subsection{Tecnologie}
 
 \subsubsection{Python}
-Python è utilizzato come principale linguaggio di programmazione. Esso, nello specifico, è un linguaggio object-oriented, creato da Guido Rossum nel 1989 e progettato per una rapida prototipazione di applicazioni complesse. È in grado di interfacciarsi con molte chiamate di sistema e librerie (tra cui anche OpenCV e Dlib), ed è estendibile al C o al C++. Python è inoltre molto utilizzato in discipline quali \textit{Artificial Intelligence}, \textit{Natural Language Generation}, \textit{Neural Network} e altri campi avanzati della Computer Science. È stato scelto per l'importanza da esso attribuita alla leggibilità dal codice e per la sua compatibilità cross-platform. Python è anche il linguaggio maggiormente consigliato per uno sviluppo su Raspberry Pi, tra quelli supportati.
+Python è utilizzato come principale linguaggio di programmazione. Esso, nello specifico, è un linguaggio object-oriented, creato da Guido Rossum nel 1989 e progettato per una rapida prototipazione di applicazioni complesse. È in grado di interfacciarsi con molte chiamate di sistema e librerie (tra cui anche OpenCV e Dlib), ed è estendibile al C o al C++. Python è inoltre molto utilizzato in discipline quali \textit{Artificial Intelligence}, \textit{Data Mining}, \textit{Machine Learning} e altri campi avanzati della Computer Science. È stato scelto per l'importanza da esso attribuita alla leggibilità dal codice e per la sua compatibilità cross-platform. Python è anche il linguaggio maggiormente consigliato per uno sviluppo su Raspberry Pi, tra quelli supportati.
 
 \subsubsection{OpenCV}
 \label{subsec:opencv}
@@ -727,11 +731,107 @@ Relativamente all'elaborato, la libreria Dlib è stata scelta in quanto fornisce
 
 \subsubsection{Imutils}
 \label{subsec:imutils}
-Imutils\cite{Imutils} è una libreria open source mantenuta dalla community di \textit{pyimagesearch}\cite{Pyimagesearch} (noto blog dedicato alla Computer Vision e realizzato da Adrian Rosebrock). Essa contiene una serie di funzioni di utilità per l'elaborazione di immagini (come traslazione, rotazione, ridimensionamento) finalizzate a semplificare il lavoro con OpenCV e Python. All'interno dell'elaborato è stata utilizzata per leggere i frame catturati dalla RaspiCam (\textit{VideoStream}), per semplificare l'accesso ai landmark degli occhi restituiti da Dlib e per compiere operazioni di resizing con mantenimento dell'aspect ratio.
+Imutils\cite{Imutils} è una libreria open source mantenuta dalla community di \textit{pyimagesearch}\cite{Pyimagesearch} (noto blog dedicato alla Computer Vision e realizzato da Adrian Rosebrock). Essa contiene una serie di funzioni di utilità per l'elaborazione di immagini (come traslazione, rotazione, ridimensionamento) finalizzate a semplificare il lavoro con OpenCV e Python. All'interno dell'elaborato è stata utilizzata per leggere i frame catturati dalla RaspiCam (\textit{VideoStream}), per semplificare l'accesso ai landmark degli occhi restituiti da Dlib, per compiere operazioni di resizing con mantenimento dell'aspect ratio e per calcolare la velocità dell'algoritmo in termini di FPS.
+
+\subsection{Real time drowsiness detection script}
+Di seguito si riportano le porzioni di codice ritenute maggiormente significative per lo script Python dedicato al rilevamento real time della sonnolenza durante la guida.\\
+Al fine di poter cambiare agilmente i parametri principali dell'algoritmo, si è scelto di specificare quest'ultimi come argomenti a linea di comando. Lo script, in particolare, ne richiede due obbligatori e uno opzionale.
+\begin{itemize}
+	\item \texttt{--cascade} (obbligatorio), si riferisce al file XML contenente la conoscenza del classificatore a cascata che si vuole utilizzare per la localizzazione del volto. Così facendo è possibile passare rapidamente da un'operazione di \textit{face detection} basata su Haar feature a una realizzata con LBP (per le ragioni già illustrate nel paragrafo \ref{subsubsec:face_detection} della precedente sezione).
+	\item \texttt{--shape-predictor} (obbligatorio), è il percorso al file .dat per la costruzione dello shape predictor di Dlib per l'individuazione dei \textit{facial landmark}.
+	\item \texttt{--alarm} (opzionale), indica se il buzzer acustico debba essere utilizzato o meno in caso di rilevamento di sonnolenza.
+\end{itemize}
+
+\begin{python}
+	ap = argparse.ArgumentParser()
+	ap.add_argument("-c", "--cascade", required=True,
+		help = "path to where the face cascade resides")
+	ap.add_argument("-p", "--shape-predictor", required=True,
+		help="path to facial landmark predictor")
+	ap.add_argument("-a", "--alarm", type=int, default=0,
+		help="boolean used to indicate if buzzer should be used")
+	args = vars(ap.parse_args())
+\end{python}
+
+Dopo aver letto i parametri di input, si procede con la configurazione dei pin di GPIO per i tre LED (output) e per il buzzer (input). Tale operazione, data la sua semplicità, non è riportata all'interno della relazione. A seguito del setup dei pin stessi, si effettua il caricamento della conoscenza all'interno del tipo \texttt{CascadeClassifier}.\\
+
+\begin{python}
+	# load OpenCV's Haar/LBP cascade for face detection (which
+	# is faster than dlib's built-in HOG detector, but less
+	# accurate), then create the facial landmark predictor
+	detector = cv2.CascadeClassifier(args["cascade"])
+	predictor = dlib.shape_predictor(args["shape_predictor"])
+\end{python}
+
+\begin{python}
+	# grab the indexes of the facial landmarks for the left and
+	# right eye, respectively
+	(lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
+	(rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
+\end{python}
+
+\begin{python}
+	vs = VideoStream(usePiCamera=True).start()
+	time.sleep(1.0)
+\end{python}
+
+\begin{python}
+	# grab the frame from the threaded video file stream, resize
+	# it, and convert it to grayscale channels)
+	frame = vs.read()
+	frame = imutils.resize(frame, width=450)
+	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+	
+	# detect faces in the grayscale frame
+	rects = detector.detectMultiScale(gray, scaleFactor=1.1, 
+		minNeighbors=5, minSize=(30, 30),
+		flags=cv2.CASCADE_SCALE_IMAGE)
+\end{python}
+
+\begin{python}
+	# loop over the face detections
+	for (x, y, w, h) in rects:
+		# construct a dlib rectangle object from the Haar cascade
+		# bounding box
+		rect = dlib.rectangle(int(x), int(y), int(x + w),
+		int(y + h))
+		
+		# determine the facial landmarks for the face region, then
+		# convert the facial landmark (x, y)-coordinates to a NumPy
+		# array
+		shape = predictor(gray, rect)
+		...
+\end{python}
+
+\begin{python}
+	def euclidean_dist(ptA, ptB):
+	# compute and return the euclidean distance between the two
+	# points
+	return np.linalg.norm(ptA - ptB)
+	
+	def eye_aspect_ratio(eye):
+	# compute the euclidean distances between the two sets of
+	# vertical eye landmarks (x, y)-coordinates
+	A = euclidean_dist(eye[1], eye[5])
+	B = euclidean_dist(eye[2], eye[4])
+	
+	# compute the euclidean distance between the horizontal
+	# eye landmark (x, y)-coordinates
+	C = euclidean_dist(eye[0], eye[3])
+	
+	# compute the eye aspect ratio
+	ear = (A + B) / (2.0 * C)
+	
+	# return the eye aspect ratio
+	return ear
+\end{python}
+Citare disegno sul frame di FPS, EAR e ALERT tramite OpenCV.
 
 
+\subsection{Lancio dello script in fase di reboot}
 
-%- Fissaggio camera
+
+%- Reboot
 %- Script
 
 %\begin{python}
@@ -779,6 +879,9 @@ Imutils\cite{Imutils} è una libreria open source mantenuta dalla community di \
 
 \section{Testing e performance}
 
+LBP 11 FPS
+
+% Fissaggio camera
 % pose testa (However, the Dlib Framework is not able to detect different positions of the driver's face such as turning the head completely right or left. In this case, these images are removed from the used dataset.)
 % posizionamento camera
 % dataset (raccolta video, struttura e nomenclatura)
