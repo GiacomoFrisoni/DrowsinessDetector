@@ -752,6 +752,7 @@ Relativamente all'elaborato, la libreria Dlib è stata scelta in quanto fornisce
 Imutils\cite{Imutils} è una libreria open source mantenuta dalla community di \textit{pyimagesearch}\cite{Pyimagesearch} (noto blog dedicato alla Computer Vision e realizzato da Adrian Rosebrock). Essa contiene una serie di funzioni di utilità per l'elaborazione di immagini (come traslazione, rotazione, ridimensionamento) finalizzate a semplificare il lavoro con OpenCV e Python. All'interno dell'elaborato è stata utilizzata per leggere i frame catturati dalla RaspiCam (\textit{VideoStream}), per semplificare l'accesso ai landmark degli occhi restituiti da Dlib, per compiere operazioni di resizing con mantenimento dell'aspect ratio e per calcolare la velocità dell'algoritmo in termini di FPS.
 
 \subsection{Real time drowsiness detection script}
+\label{subsec:main_script}
 Di seguito si riportano le porzioni di codice ritenute maggiormente significative per lo script Python dedicato al rilevamento real time della sonnolenza durante la guida.\\
 Al fine di poter cambiare agilmente i parametri principali dell'algoritmo, si è scelto di specificare quest'ultimi come argomenti a linea di comando. Lo script, in particolare, ne richiede due obbligatori e uno opzionale.
 \begin{itemize}
@@ -930,9 +931,51 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 \section{Testing e performance}
 
 \subsection{LBP VS Haar}
-% LBP 11 FPS
-% Haar 7 FPS
+A seguito dell'implementazione, lo script \texttt{drowsiness\_stream\_detector.py} - illustrato nel paragrafo \ref{subsec:main_script} -  è stato da subito testato sia con conoscenza LBP che Haar (\texttt{--cascade}), mettendo a confronto i risultati. Durante lo svolgimento di questa fase è emerso come un classificatore LBP sia effettivamente più veloce di Haar (11 FPS anzichè 7) ma anche sensibilmente meno accurato, confermando quanto noto in letteratura (paragrafo \ref{subsubsec:face_detection}). A fronte del ridotto dislivello prestazionale, si è ritenuto opportuno preferire gli Haar Cascade Classifier per il loro maggior numero di localizzazioni con successo. Considerando come la durata media di un battito di ciglia si attesti tra i 300 e i 400 millisecondi, si è scelto di fissare il numero necessario di frame consecutivi con EAR sotto la soglia per l'instaurazione dell'allarme a 16 (dimostratosi essere un valore adatto dal punto di vista della sensibilità).
+
 \subsubsection{Limiti di Haar}
+Nella conduzione delle prove sperimentali si ha avuto modo di verificare alcuni limiti di Haar Cascade Classifier nella localizzazione facciale. Nonostante sia perfettamente in grado di individuare volti orientati frontalmente rispetto alla camera o leggermente angolati, infatti, l'algoritmo non si è dimostrato capace di far fronte a inclinazioni della testa o ad angolazioni più marcate. La Figura \ref{fig:face_poses} ne riporta alcuni esempi pratici.
+
+\begin{figure}[!htb]
+	\begin{subfigure}{.3\textwidth}
+		\centering
+		\includegraphics[width=.8\linewidth]{eps/mp_straight_view.eps}
+		\caption{Volto in posizione frontale.}
+	\end{subfigure}
+	\hspace{5mm}
+	\begin{subfigure}{.3\textwidth}
+		\centering
+		\includegraphics[width=.8\linewidth]{eps/mp_right_view.eps}
+		\caption{Volto parzialmente rivolto a destra.}
+	\end{subfigure}
+	\hspace{5mm}
+	\begin{subfigure}{.3\textwidth}
+		\centering
+		\includegraphics[width=.8\linewidth]{eps/mp_upward_view.eps}
+		\caption{Volto rivolto verso l'alto.}
+	\end{subfigure}
+	\par\bigskip % force a bit of vertical whitespace
+	\begin{subfigure}{.3\textwidth}
+		\centering
+		\includegraphics[width=.8\linewidth]{eps/mp_left_tilted_view.eps}
+		\caption{Volto inclinato a sinistra.}
+	\end{subfigure}
+	\hspace{5mm}
+	\begin{subfigure}{.3\textwidth}
+		\centering
+		\includegraphics[width=.8\linewidth]{eps/mp_full_right_view.eps}
+		\caption{Volto totalmente rivolto a destra.}
+	\end{subfigure}
+	\hspace{5mm}
+	\begin{subfigure}{.3\textwidth}
+		\centering
+		\includegraphics[width=.8\linewidth]{eps/mp_downward_view.eps}
+		\caption{Volto rivolto verso il basso.}
+	\end{subfigure}
+	\caption{Localizzazione del volto con diverse angolazioni facciali.}
+	\label{fig:face_poses}
+\end{figure}
+
 % pose testa (However, the Dlib Framework is not able to detect different positions of the driver's face such as turning the head completely right or left. In this case, these images are removed from the used dataset.)
 
 \subsection{Costruzione dataset}
@@ -1157,10 +1200,12 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 
 Calibrazione soglia EAR per utente.
 
-%If a face is detected, then a region of interest in marked within the face. This region of interest contains the eyes. Defining a region of interest significantly reduces the computational requirements of the system. After that the eyes are detected from the region of interest.
+If a face is detected, then a region of interest in marked within the face. This region of interest contains the eyes. Defining a region of interest significantly reduces the computational requirements of the system. After that the eyes are detected from the region of interest.
 
 However, it has been found that the rate of detecting the correct feature, or the percentage of success among a number of detection attempts, varies depending on the application and number of classes. The determination of drowsiness using PERCLOS and Eye Blink has a success rate of close to 100\% [43] and 98\% [45], respectively. However it has to be noted that, the high positive detection rate achieved by [43] was when the subjects didn’t wear glasses. Likewise, as most researchers conducted their experiments in simulated environment they achieved a higher success rate. The positive detection rate decreased significantly when the experiment was carried out in a real environment [15].
 Another limitation of behavioral measure was brought out in an experiment conducted by Golz et al. They evaluated various drowsiness monitoring commercial products, and observed that driver state cannot be correlated to driving performance and vehicle status based on behavioral measures alone [57].
+
+Passaggio a HW più potente.
 
 Esporre brevemente le considerazioni conclusive sul progetto presentato, indicando anche i possibili sviluppi futuri.\\
 
