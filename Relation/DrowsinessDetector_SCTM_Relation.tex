@@ -512,6 +512,7 @@ Per il progetto in esame si è scelto di adottare EAR thresholding, a causa del 
 \end{figure}
 
 \subsection{Architettura software}
+\label{subsec:software}
 
 In Figura \ref{fig:flowchart} è riportato il flowchart illustrante l'esecuzione step-by-step (nelle sue parti principali) dell'algoritmo proposto, così come pensato in fase di progettazione.
 \begin{figure}[!htb]
@@ -753,7 +754,9 @@ Al fine di poter cambiare agilmente i parametri principali dell'algoritmo, si è
 	args = vars(ap.parse_args())
 \end{python}
 
-Dopo aver letto i parametri di input, si procede con la configurazione dei pin di GPIO per i tre LED (output) e per il buzzer (input). Tale operazione, data la sua semplicità, non è riportata all'interno della relazione. A seguito del setup dei pin stessi, si effettua il caricamento della conoscenza all'interno del tipo \texttt{CascadeClassifier}.\\
+\vspace{0.3cm}
+Dopo aver letto i parametri di input, si procede con la configurazione dei pin di GPIO per i tre LED (output) e per il buzzer (input). Tale operazione, data la sua semplicità, non è riportata all'interno della relazione. A seguito del setup dei pin stessi, si effettua il caricamento della conoscenza per il riconoscimento del volto all'interno del tipo \texttt{CascadeClassifier} di OpenCV (pensato generalmente per la localizzazione di oggetti)\cite{OpenCVCascadeClassifier}. Successivamente si crea anche l'oggetto \textit{predictor} di Dlib, sempre a partire dal path indicato come argomento al lancio dello script.
+\vspace{0.3cm}
 
 \begin{python}
 	# load OpenCV's Haar/LBP cascade for face detection (which
@@ -763,6 +766,10 @@ Dopo aver letto i parametri di input, si procede con la configurazione dei pin d
 	predictor = dlib.shape_predictor(args["shape_predictor"])
 \end{python}
 
+\vspace{0.3cm}
+I \textit{facial landmark} prodotti da Dlib sono racchiusi in una lista di 64 elementi (uno per ogni coordinata significativa del volto). Per accedere alle regioni degli occhi si fa uso della libreria \textit{imutils}, che fornisce la possibilità di ottenere gli indici corretti (\textit{array slice}) della regione d'interesse interna alla \quotes{shape} semplicemente mediante un accesso associativo facente uso del nome come chiave.
+\vspace{0.3cm}
+
 \begin{python}
 	# grab the indexes of the facial landmarks for the left and
 	# right eye, respectively
@@ -770,10 +777,18 @@ Dopo aver letto i parametri di input, si procede con la configurazione dei pin d
 	(rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 \end{python}
 
+\vspace{0.3cm}
+A fronte dell'attivazione del rilevatore mediante la pressione del pulsante (vedi sezione \ref{sec:requisiti}), è necessario avviare lo stream video dalla RaspiCam su un nuovo thread. A tal scopo si è nuovamente fatto uso di una classe interna a \textit{imutils}: \texttt{VideoStream}. L'attesa di un secondo consente al sensore di camera di riscaldarsi.
+\vspace{0.3cm}
+
 \begin{python}
 	vs = VideoStream(usePiCamera=True).start()
 	time.sleep(1.0)
 \end{python}
+
+\vspace{0.3cm}
+Giunti a questo punto si esegue la lettura ciclica dei frame catturati dallo stream. Prima di passare alla localizzazione del volto, ogni frame viene ridimensionato a una larghezza di 450 pixel (utilizzando la funzione fornita da \textit{imutils}, per i vantaggi posseduti rispetto a quella standard di OpenCV) e convertito in scala di grigi. Queste trasformazioni riducono la dimensione del frame e rendono pertanto il successivo processo di rilevazione sensibilmente più efficiente. L'individuazione dei volti contenuti nell'immagine grayscale è invece  realizzata grazie al metodo OpenCV \texttt{detectMultiScale}\cite{OpenCVCascadeClassifier}.
+\vspace{0.3cm}
 
 \begin{python}
 	# grab the frame from the threaded video file stream, resize
@@ -788,6 +803,10 @@ Dopo aver letto i parametri di input, si procede con la configurazione dei pin d
 		flags=cv2.CASCADE_SCALE_IMAGE)
 \end{python}
 
+\vspace{0.3cm}
+Per ogni volto rilevato col classificatore a cascata specificato in input, OpenCV restituisce un rettangolo corrispondente al \textit{bounding box} del volto stesso. Le coordinate di questo oggetto sono usate per la costruzione di un \texttt{dlib.rectangle}. Grazie a esso è possibile avviare la predizione dei \textit{facial landmark} sulla sola regione dell'immagine contenente il volto individuato con l'algoritmo di localizzazione. La \quotes{shape} restituita da Dlib - formata da coordinate (x, y) - è poi convertita in un \textit{NumPy array} da cui possono essere estratte le 12 coordinate degli occhi. Inoltre, è importante osservare che l'estrazione dei punti di riferimento facciali non è nemmeno perseguita nel caso in cui non venga individuato nessun volto all'interno del frame.
+\vspace{0.3cm}
+
 \begin{python}
 	# loop over the face detections
 	for (x, y, w, h) in rects:
@@ -800,75 +819,89 @@ Dopo aver letto i parametri di input, si procede con la configurazione dei pin d
 		# convert the facial landmark (x, y)-coordinates to a NumPy
 		# array
 		shape = predictor(gray, rect)
+		shape = face_utils.shape_to_np(shape)
+		
+		# extract the left and right eye coordinates, then use the
+		# coordinates to compute the eye aspect ratio for both eyes
+		leftEye = shape[lStart:lEnd]
+		rightEye = shape[rStart:rEnd]
 		...
 \end{python}
 
+\vspace{0.3cm}
+A partire dalle coordinate di ogni occhio è possibile calcolare l'EAR. Si sono così implementate due funzioni: una per il calcolo della distanza euclidea tra due punti (incentrata su \textit{NumPy}) e l'altra per l'elaborazione dell'\textit{Eye Aspect Ratio} vero e proprio. Per offrire una stima dell'apertura di entrambi gli occhi e non di uno soltanto, si è scelto di calcolare il valore di EAR medio (come indicato nel paper originario\cite{EAR}).
+\vspace{0.3cm}
+
 \begin{python}
 	def euclidean_dist(ptA, ptB):
-	# compute and return the euclidean distance between the two
-	# points
-	return np.linalg.norm(ptA - ptB)
+		# compute and return the euclidean distance between the two
+		# points
+		return np.linalg.norm(ptA - ptB)
 	
 	def eye_aspect_ratio(eye):
-	# compute the euclidean distances between the two sets of
-	# vertical eye landmarks (x, y)-coordinates
-	A = euclidean_dist(eye[1], eye[5])
-	B = euclidean_dist(eye[2], eye[4])
-	
-	# compute the euclidean distance between the horizontal
-	# eye landmark (x, y)-coordinates
-	C = euclidean_dist(eye[0], eye[3])
-	
-	# compute the eye aspect ratio
-	ear = (A + B) / (2.0 * C)
-	
-	# return the eye aspect ratio
-	return ear
+		# compute the euclidean distances between the two sets of
+		# vertical eye landmarks (x, y)-coordinates
+		A = euclidean_dist(eye[1], eye[5])
+		B = euclidean_dist(eye[2], eye[4])
+		
+		# compute the euclidean distance between the horizontal
+		# eye landmark (x, y)-coordinates
+		C = euclidean_dist(eye[0], eye[3])
+		
+		# compute the eye aspect ratio
+		ear = (A + B) / (2.0 * C)
+		
+		# return the eye aspect ratio
+		return ear
 \end{python}
-Citare disegno sul frame di FPS, EAR e ALERT tramite OpenCV.
 
+\vspace{0.3cm}
+Calcolato l'EAR si prosegue con la sua comparazione rispetto al valore di soglia fissato ($EAR_{th}$), seguendo il procedimento già evidenziato col flowchart del precedente paragrafo \ref{subsec:software}. Per ragioni di visualizzazione, si cita l'uso di \texttt{cv2.imshow}: tramite esso si sono mostrati i frame elaborati, disegnando su ciascuno di questi (tramite \texttt{cv2.putText}, \texttt{cv2.drawContours} e \texttt{cv2.rectangle}) i valori di EAR, il conteggio di frame, il \textit{bounding box} del volto, le regioni associate agli occhi e gli avvisi di sonnolenza. La Figura \ref{fig:drowsiness_output} mostra un esempio di tale output.
+
+\begin{figure}
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.8\linewidth]{eps/gf_opened_eyes.eps}
+		\caption{Output con guidatore sveglio.}
+	\end{subfigure}
+	\hspace{5mm}
+	\begin{subfigure}{.5\textwidth}
+		\centering
+		\includegraphics[width=.8\linewidth]{eps/gf_closed_eyes.eps}
+		\caption{Output con guidatore assonnato.}
+	\end{subfigure}
+	\caption{Output grafico fornito da \texttt{drowsiness\_stream\_detector.py}.}
+	\label{fig:drowsiness_output}
+\end{figure}
 
 \subsection{Lancio dello script in fase di reboot}
+% TO DO
+a\\
+b\\
+c\\
+d\\
+f\\
+g\\
+h\\
 
 
-%- Reboot
-%- Script
+\iffalse
+Esporre i principali problemi affrontati durante l'effettiva realizzazione delle componenti hardware/software e illustrare le soluzioni implementative adottate. Se l'elaborato ha previsto l'utilizzo di tecnologie già disponibili sul mercato, discuterne brevemente le caratteristiche e motivarne l'adozione rispetto ad altre soluzioni assimilabili.\\
 
-%\begin{python}
-%	python
-%	import cv2
-%	import imutils
-%\end{python}
+\textbf{NOTA: in questa sezione devono essere riportate esclusivamente le porzioni di codice ritenute particolarmente significative. Il codice sorgente nella sua interezza, opportunamente commentato, deve essere consegnato separatamente dalla relazione in un archivio compresso.}\\
 
-%EAR: media per due occhi
+Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nelle immagini, schemi):
 
-%Dlib, a crossplatform software library equipped with machine learning toolkits was used for this purpose. Dlib recognizes eyes by identifying six defining coordinates as shown.
-
-%The shape predictor identifies 68 landmarks on a face and assigns coordinates to each of them with respect to the bounding box of the face. These individual coordinates can be extracted from the created “shape” object as NumPy arrays. Using Dlib‘s coordinates for the left and right eyes, it is possible to highlight the eyes alone, so that a live stream will capture each frame and mark the contours of the eyes corresponding to the upper and lower lids
-
-% dlib’s 68 facial landmarks are indexable which enables us to extract the various facial structures using simple Python array slices.
-
-% Ci sono diverse classi di appoggio sulle quali si possono effettuare operazioni di elaborazione di immagini. Si preferisce l'utilizzo della libreria \textit{imutils}, ricca di funzionalità e di facile utilizzo. La procedura d'installazione è la classica e prevede l'esecuzione del comando:
-
-%If a face is detected, then a region of interest in marked within the face. This region of interest contains the eyes. Defining a region of interest significantly reduces the computational requirements of the system. After that the eyes are detected from the region of interest.
-
-%Esporre i principali problemi affrontati durante l'effettiva realizzazione delle componenti hardware/software e illustrare le soluzioni implementative adottate. Se l'elaborato ha previsto l'utilizzo di tecnologie già disponibili sul mercato, discuterne brevemente le caratteristiche e motivarne l'adozione rispetto ad altre soluzioni assimilabili.\\
-
-%\textbf{NOTA: in questa sezione devono essere riportate esclusivamente le porzioni di codice ritenute particolarmente significative. Il codice sorgente nella sua interezza, opportunamente commentato, deve essere consegnato separatamente dalla relazione in un archivio compresso.}\\
-
-
-%Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nelle immagini, schemi):
-
-%\vspace{1cm}
-%\begin{tabular}{l|rr}
-% & Numero minimo di battute & Numero massimo di battute \\
-% \hline
-% 1 componente & 5000 & 11000 \\
-% 2 componenti & 8000 & 16000 \\
-% 3 componenti & 10000 & 21000 \\
-% \hline
-%\end{tabular}
-
+\vspace{1cm}
+\begin{tabular}{l|rr}
+& Numero minimo di battute & Numero massimo di battute \\
+\hline
+1 componente & 5000 & 11000 \\
+2 componenti & 8000 & 16000 \\
+3 componenti & 10000 & 21000 \\
+\hline
+\end{tabular}
+\fi
 
 \newpage
 
@@ -1268,6 +1301,8 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 \section{Conclusioni}
 
 Calibrazione soglia EAR per utente.
+
+%If a face is detected, then a region of interest in marked within the face. This region of interest contains the eyes. Defining a region of interest significantly reduces the computational requirements of the system. After that the eyes are detected from the region of interest.
 
 However, it has been found that the rate of detecting the correct feature, or the percentage of success among a number of detection attempts, varies depending on the application and number of classes. The determination of drowsiness using PERCLOS and Eye Blink has a success rate of close to 100\% [43] and 98\% [45], respectively. However it has to be noted that, the high positive detection rate achieved by [43] was when the subjects didn’t wear glasses. Likewise, as most researchers conducted their experiments in simulated environment they achieved a higher success rate. The positive detection rate decreased significantly when the experiment was carried out in a real environment [15].
 Another limitation of behavioral measure was brought out in an experiment conducted by Golz et al. They evaluated various drowsiness monitoring commercial products, and observed that driver state cannot be correlated to driving performance and vehicle status based on behavioral measures alone [57].
