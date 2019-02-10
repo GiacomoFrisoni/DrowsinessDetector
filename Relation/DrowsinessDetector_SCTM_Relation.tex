@@ -988,13 +988,37 @@ Per la valutazione delle performance del progetto proposto, si è scelto di cost
 La realizzazione di un nuovo dataset ha anche fornito l'opportunità di definire specifici scenari d'interesse per cui catturare video rappresentativi. Si è innanzitutto scelto di condurre test sia di giorno che di notte (\texttt{Day/Night}), in modo da verificare l'efficacia del sistema con diverse condizioni di luce (tipico elemento critico per progetti di Computer Vision). Per entrambe le categorie si sono poi creati video sia con esempi positivi che senza (\texttt{Drowsiness/NoDrowsiness}), ovvero con presenza di fenomeni di sonnolenza e non. Per ognuna di queste sottocategorie si sono svolte prove con e senza occhiali (\texttt{Glasses/NoGlasses}): gli occhiali, infatti, sono un classico elemento di disturbo per gli algoritmi di face detection. Infine, nuovamente per ogni sottocategoria, si è fatta distinzione tra video con una posa statica dell'utente e video dinamici (\texttt{Static/Dynamic}). Alla base di tale scelta vi è la volontà di osservare il comportamento del rilevatore anche in contesti in cui il conducente sorride ed effettua movimenti di varia natura che potrebbero compromettere sia l'efficacia di Haar che la stima dell'EAR, a causa di involontari cali di aspect ratio dovuti alle espressioni facciali. In conclusione, si osserva come i video siano stati pertanto suddivisi in 16 ($2^4$) categorie.
 
 \subsubsection{Acquisizione video}
-% Presentazione dello script dei 30 secondi
-% Posizionamento camera e distanza in macchina
-% In macchina (don't try this at home)
-% Foto esempio
+La costruzione del dataset mediante l'utilizzo dello stesso circuito è stata possibile grazie alla realizzazione di un ulteriore script Python: \texttt{rec\_video.py}. All'interno di esso si è fatto uso della libreria \texttt{picamera} al fine di catturare video con una lunghezza prestabilita pari a 30 secondi (895 frame totali) e con estensione \quotes{.h264}. Il processo di acquisizione è stato ulteriormente semplificato grazie all'impiego del pulsante per il suo avvio e di opportune segnalazioni luminose per l'indicazione dello stato corrente. La Figura \ref{fig:system_uses} mostra le due configurazioni del sistema che sono state adottate per lo svolgimento di questa fase.\\
+
+\begin{figure}[!htb]
+	\begin{subfigure}{.45\textwidth}
+		\centering
+		\includegraphics[width=.8\linewidth]{eps/home_circuit.eps}
+		\caption{Raspberry Pi connesso al Desktop per fini di analisi o debug.}
+	\end{subfigure}
+	\hspace{5mm}
+	\begin{subfigure}{.55\textwidth}
+		\centering
+		\includegraphics[width=.8\linewidth]{eps/car_circuit.eps}
+		\caption{Raspberry Pi installato all'interno\\dell'autoveicolo.}
+	\end{subfigure}
+	\caption{Configurazione del sistema in fase d'analisi e in fase operativa.}
+	\label{fig:system_uses}
+\end{figure}
+
+Per poter realizzare l'acquisizione dei video a bordo dell'autoveicolo, si è creato un file bash \texttt{rec\_video\_launch.sh} per il lancio dello script in fase di reboot e si è alimentato il Raspberry Pi mediante l'ausilio di un power bank. Le registrazioni, per un maggior realismo e per una più alta affidabilità dei dati raccolti, sono state interamente realizzate all'interno del veicolo (sia fermo che in movimento). Nel caso di veicolo in movimento si sottolinea come tutte le riprese siano state fatte in scenari sicuri, all'interno di parcheggi isolati e con la necessaria presenza di un'altra persona. 
+% Distanza camera
+
 \subsubsection{Etichettatura}
-% Manuale
-% File di accompagnamento
+I video raccolti sono stati convertiti in formato \textit{mp4} e suddivisi in frame (grazie al software \quotes{Free Video to JPG Converter}\cite{FrameExtraction}). L'etichettatura è stata poi realizzata manualmente, analizzando i singoli frame e producendo un file allegato al video con l'enumerazione degli intervalli oggetto di sonnolenza (come mostrato in Figura \ref{fig:video_label}).
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.45]{eps/result_1_gf.eps}
+	\caption{Esempio di etichettatura di un video.}
+	\label{fig:video_label}
+\end{figure}
+
 \subsubsection{Nomenclatura}
 
 \subsection{Prestazioni}
