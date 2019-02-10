@@ -346,6 +346,7 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 In questa sezione sono esposte le scelte progettuali operate nelle varie fasi di sviluppo dell'elaborato.
 
 \subsection{Metodologia}
+\label{subsec:metodologia}
 
 La metodologia alla base del progetto si compone di tre parti fondamentali: (1) rilevamento del volto (\textit{face detection}), (2) rilevamento dei punti di riferimento facciali (\textit{facial landmark detection}) e (3) rilevamento della sonnolenza. Ciascuno di questi problemi può essere affrontato con diversi approcci risolutori noti in letteratura. Dal momento che ogni tecnica possiede sia aspetti positivi che negativi, la scelta di quale adottare per il problema di riferimento deve essere frutto di un'attenta analisi in funzione dei requisiti che si devono soddisfare (già evidenziati nella sezione \ref{sec:requisiti}). La valutazione e lo studio delle soluzioni che possono essere intraprese nelle fasi metodologiche costituiscono pertanto due elementi chiave per una valida progettazione. Esse assumono inoltre un ruolo preponderante nella determinazione del successo o del fallimento degli obiettivi stabiliti dall'elaborato stesso. Nei successivi paragrafi si discutono in maggior dettaglio le problematiche emerse sul piano progettuale e si giustificano le scelte intraprese.
 
@@ -934,6 +935,7 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 %----------------------------------------------------------------------------------------
 
 \section{Testing e performance}
+\label{sec:testing}
 
 \subsection{LBP VS Haar}
 A seguito dell'implementazione, lo script \texttt{drowsiness\_stream\_detector.py} - illustrato nel paragrafo \ref{subsec:main_script} -  è stato da subito testato sia con conoscenza LBP che Haar (\texttt{--cascade}), mettendo a confronto i risultati. Durante lo svolgimento di questa fase è emerso come un classificatore LBP sia effettivamente più veloce di Haar (11 FPS anzichè 7) ma anche sensibilmente meno accurato, confermando quanto noto in letteratura (paragrafo \ref{subsubsec:face_detection}). A fronte del ridotto dislivello prestazionale, si è ritenuto opportuno preferire gli Haar Cascade Classifier per il loro maggior numero di localizzazioni con successo. Considerando come la durata media di un battito di ciglia si attesti tra i 300 e i 400 millisecondi, si è scelto di fissare il numero necessario di frame consecutivi con EAR sotto la soglia per l'instaurazione dell'allarme a 16 (dimostratosi essere un valore adatto dal punto di vista della sensibilità).
@@ -1227,21 +1229,21 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 
 \section{Analisi di deployment su larga scala}
 
-Il progetto è stato creato utilizzando una breadboard ed un Raspberry, dunque è indubbiamente in uno stato prototipale, non pronto per un rilascio su larga scala: gli eventuali costi di produzione e l'ingombro causato dalla circuiteria non porterebbero sicuramente una vasta domanda sul device così creato. Prima di procedere ad un deployment su larga scala occorre sistemare moltissime problematiche derivanti dallo stato prototipale del progetto e far fronte alle difficoltà riscontrate in termini di affidabilità e performance del rilevamento.\\
+L'uso di una breadboard e l'adozione di Raspberry Pi come single-board computer rendono indubbiamente il progetto di natura prototipale. Se i costi di produzione appaiono ridotti nel caso individuale, essi non sono soddisfacenti dal punto di vista di un eventuale deployment su larga scala (che richiederebbe la realizzazione di un device specifico per il progetto).\\
 
-L'ingombro costituisce il primo problema con l'attuale soluzione proposta, infatti, per poter essere distribuito, il device dovrebbe risultare molto più contenuto nelle sue dimensioni. E' assolutamente necessario rimuovere qualsiasi traccia di prototipazione, in modo tale da garantire la sicurezza e l'integrità del device, nonchè un aspetto piacevole e comune agli altri device di sicurezza in automobile. L'eliminazione della breadboard comporta la necessità della creazione di un circuito elettronico ad hoc, che necessità di essere progettato, ordinato, montato e testato.\\
+L'ingombro della circuiteria che si ha con Raspberry costituisce un problema fondamentale: per poter essere distribuito sul mercato, infatti, il dispositivo dovrebbe risultare molto più contenuto nelle sue dimensioni. L'impiego di una breadboard, inoltre, appare percorribile per soli fini di prototipazione. Essa non si dimostra capace né di garantire sicurezza né di assicurare integrità, senza considerare l'importanza sul piano commerciale di un aspetto estetico gradevole che il prodotto dovrebbe avere. La sua eliminazione comporta la necessità di un circuito elettronico ad hoc, appositamente progettato, assemblato e testato.\\
+Il Raspberry offre una buona base di partenza per l'elaborato, ma - essendo un device general purpose - non si addice bene al ruolo finale che dovrebbe essere ricoperto dal sistema. La scheda presenta al suo interno molti componenti non richiesti dal progetto e che potrebbero rendere il dispositivo vulnerabile a eventuali intrusioni o manomissioni, compromettendo l'efficacia della soluzione creata. In considerazione di tale problematica, l'uso di un device creato appositamente per rispondere alle esigenze del progetto stesso costituirebbe un ambiente molto più controllabile e sicuro. Tuttavia occorre sottolineare come una soluzione di questo tipo comporti spese significative e richieda un'ulteriore fase di progettazione.\\
 
-Il Raspberry offe una buona base di partenza per il progetto, ma essendo un device general purpose, non si addice bene al ruolo finale che deve coprire. La schedina presenta al suo interno moltissimi componenti non utilizzati nel progetto, ma che potrebbero lasciare il dispositivo vulnerabile ad eventuali intrusioni o manomissioni, compromettendo l'efficacia della soluzione creata. Occorrerebbe, anche in questo caso, avere a disposizione un device creato ad hoc per funzionare soltanto con la soluzione corrente, in modo tale da avere un ambiente molto più controllabile e sicuro. Certamente, una soluzione di questo tipo comporta non banali spese, nonchè una progettazione di un ulteriore scheda elettronica, per cui l'adottamento del Raspberry nella soluzione finale rimane comunque una scelta valida, ma indubbiamente sconsigliata sia per i costi elevati, sia per la sicurezza delle persone e del device stesso.\\
-Se comunque si decide di procedere con l'utilizzo del Raspberry, è necessario adottare tutte le misure di sicurezza, affinchè il dispositivo risulti essere inacessibile dall'esterno al di fuori dei progettisti o centri di assistenza, disattivando i pin, porte e periferiche non utilizzate e lasciando attive soltanto le parti strettamente necessarie al corretto funzionamento del sistema.\\
+Un altro problema legato a un'effettiva commercializzazione del sistema in esame, si riferisce all'affidabilità della rilevazione svolta (come già discusso nella sezione \ref{sec:testing}). Nonostante la soluzione proposta si dimostri essere pienamente efficace in presenza di buone condizioni per il suo funzionamento (quali, ad esempio, guide diurne e mancato uso di occhiali da parte del conducente), essa non è in grado di fornire lo stesso livello di prestazioni qualitative in scenari notturni, con l'impiego di occhiali e con conducenti aventi una colorazione scura della pelle (capace di rendere maggiormente difficile la localizzazione del volto). Il superamento di tali problematiche richiede l'adozione di una nuova tecnica di \textit{face detection} basata sull'uso di \textit{Deep learning}, non in grado di operare con performance real time su Raspberry Pi. I limiti di potenza del dispositivo adottato impediscono pertanto il raggiungimento dei livelli di accuratezza che un reale sistema di questa natura dovrebbe possedere (rendendo necessario il passaggio a un'altra scheda o a hardware ad hoc). L'ottimizzazione degli algoritmi impiegati nelle varie fasi metodologiche (descritte al paragrafo \ref{subsec:metodologia}) consentirebbe anche un aumento della velocità elaborativa in termini di FPS.\\
 
-Come discusso anche nel capitolo delle performance, un ulteriore problema sul deployment su larga scala è l'affidabilità del dispositivo. Nonostante la soluzione si dimostra essere pienamente capace a funzionare in buone condizioni (ad esempio di giorno, con persone senza occhiali), non è in grado di garantire lo stesso livello di performance di notte o avendo a che fare con persone indossanti occhiali. Purtroppo, anche a causa dei limiti di potenza a disposizione, questa criticità può essere soltanto leggermente migliorata, ottimizzando gli algoritmi di rilevamento o facendo una pre-configurazione del dispositivo ad hoc per ogni conducente in macchina. Le soluzioni proposte non aumenterebbero comunque le performance del device, ma sfrutterebbero le risorse attualmente presenti sulla scheda, le quali, di per sè, non sono sufficienti per un dispositivo che deve garantire un elevato livello di sicurezza del conducente sulla strada, in qualsiasi condizione. E' altresì impensabile adottare meccanismi di alto livello per la realizzazione di un device portatile: la potenza necessaria a far funzionare soffisticati algoritmi per la rilevazione dei colpi di sonno è energivora ed ingombrante, oltre che costosa e poco pratica da inserire in un contesto automobilistico. Per fare un paragone realistico, bisognerebbe includere all'interno del veicolo un device con potenza paragonabile ad un computer di fascia alta, con costi che superano ampiamente 1500 euro di spesa.\\
+Considerando la presenza di un'aperta e folta community di sviluppatori, l'elaborato potrebbe essere alternativamente reso disponibile su un canale pubblico a tutti i possessori di Raspberry Pi. Ciò conferirebbe al progetto la possibilità di crescere ed essere migliorato nelle varie sue parti, fino a raggiungere uno stadio d'avanzamento tale per cui potrebbe risultare conveniente il passaggio a una soluzione con deployment su larga scala.\\
 
-Considederanto però la presenza di un'aperta community di sviluppatori e collaboratori, il progetto potrebbe essere reso disponibile a tutti i possessori dei Raspberry (sia gratis che dietro un pagamento). Questo permetterebbe al progetto di crescere e di essere ottimizzato in varie sue parti, fino a raggiungere uno stadio definitivo, nel quale effettivamente potrebbe risultare essere conveniente includere il tutto sotto forma di un unico device integrato. Valutando la soluzione Raspberry, sarà comunque necessario configurare il dispositivo a causa dei limiti di potenza, ma il device così sviluppato potrà offrire un buon livello di supporto alla guida.\\
+Il raggiungimento di buone accuratezze su un dataset composto da video registrati in reali scenari di guida (a differenza della maggior parte delle soluzioni proposte in rete) rende ancor più apprezzabili i risultati ottenuti, dimostrando una buona robustezza della metodologia adottata per il rilevamento di sonnolenza anche in situazioni non ideali. In conclusione, il fatto di non essersi basati su soli dati catturati in contesti ottimali - nonostante l'adozione di Raspberry Pi - porta la soluzione descritta in questo documento a essere maggiormente vicina a una sua versione realmente diffondibile sul versante pratico.
 
+\iffalse
 In questa sezione va discussa, eventualmente con l'ausilio di opportuni diagrammi (componenti, deployment), l'evoluzione del progetto presentato immaginando che venga adottato su larga scala. I dettagli qui esposti devono quindi astrarre dalle specifiche dell'elaborato qualora l'implementazione sia stata focalizzata su uno scenario isolato.\\
 
 A titolo d’esempio, qualora applicabile, devono essere evidenziate le criticità che si potrebbero incontrare e devono essere proposte soluzioni tipiche in contesti di \textit{cloud architecture} per garantire un'adeguata \textit{resilienza}, in termini di \textit{availability} e \textit{scalability} del sistema.\\
-
 
 Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nelle immagini, schemi):
 
@@ -1254,7 +1256,7 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
  3 componenti & 6000 & 12000 \\
  \hline
 \end{tabular}
-
+\fi
 
 \newpage
 
@@ -1264,19 +1266,23 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 %----------------------------------------------------------------------------------------
 
 \section{Piano di lavoro}
+In questa sezione sono chiariti i compiti svolti da ciascun candidato.
 
-Lo studente Giacomo Frisoni si è ampiamente occupato dell'analisi dello stato dell'arte, informandosi su diverse fonti, quali paper scientifici, progetti realizzati, nonchè della revisione e riassunto impeccabile delle informazioni trovate e la loro successiva condivisione con il collaboratore. E' stato responsabile della impostazione e stesura di imporanti parti di questa relazione, nonchè della coordinazione dell'intero progetto. Si è reso disponibile a cercare soluzioni a problemi riguardanti l'inaccuratezza e l'inefficienza degli algoritmi standard, trovando ottime alternative gratuite e funzionanti.\\
+\begin{itemize}
+	\item \textbf{Giacomo Frisoni.}\\
+	Si è occupato dello studio delle soluzioni esistenti in letteratura allo stato dell'arte, compiendo ampie ricerche su paper scientifici e riassumendo con cura le informazioni trovate in modo da discuterle col collaboratore. Ha coordinato lo sviluppo dell'intero progetto ed è stato responsabile della stesura delle parti più significative della relazione. Si è inoltre occupato dell'approfondimento delle problematiche emerse sia in termini di inaccuratezza che inefficienza degli algoritmi standard, trovando ottime alternative percorribili.
+	\item \textbf{Marcin Pabich.}\\
+	Ha approfondito le ricerche svolte da Giacomo Frisoni durante le fasi iniziali del progetto. Successivamente è stato responsabile della configurazione del dispositivo, compresa l'installazione del sistema operativo, delle librerie e del software necessario allo sviluppo. Lo studente ha svolto un'ampia analisi delle capacità del Raspberry al fine di adottare soluzioni volte a una veloce e soddisfacente prototipazione. Si è incaricato della scelta e dell'ottenimento dei vari componenti mancanti (come MicroSD e buzzer acustico). Ha eseguito e supervisionato la fase d'analisi del dataset, raccogliendo i risultati e calcolando gli indici statistici associati. 
+\end{itemize}
 
-Lo studente Marcin Pabich si è occupato inizialmente ad un piccolo approfondimento sulle ricerche svolte da Giacomo Frisoni. Successivamente è stato responsabile della configurazione del dispositivo, compresa di installazione del sistema operativo, delle librerie e del software necessario allo sviluppo. Lo studente ha svolto un'ampia analisi delle capacità del Raspberry per adottare soluzioni volte a portare ad una veloce e soddisfacente prototipazione. E' stato responsabile della ricerca e acquisto di alcuni componenti aggiuntivi mancanti (come MicroSD e buzzer acustico) e ha svolto un lavoro di pulizia e ottimizzazione dell'organizzazione dei file sorgenti e del dataset. Infine, lo studente si è dedicato alla supervisione dell'andamento delle analisi del dataset e dei relativi risultati, che, una volta ottenuti, ha riportato in più tabelle, ognuna con i relativi calcoli.\\
+La natura fisica del progetto in esame ha necessariamente spinto i due candidati a collaborare nella realizzazione del codice (costituito sia da script Python che da comandi Bash), svolgendo una proficua e didattica esperienza di Pair Programming. Entrambi gli studenti si sono dedicati ampiamente alla costruzione del dataset, comprensivo dei principali scenari di guida reale all'interno di un autoveicolo.\\
 
-Entrambi gli studenti si sono dedicati ampiamente alla creazione di un dataset ad hoc, comprensivo di alcuni degli scenari verosimili alla reale guida di un autoveicolo. Hanno inoltre collaborato in pari merito sulla realizzazione di tutti i codici all'interno del progetto: sia script Python che comandi Bash.\\
+I dettagli sulle effettive giornate/uomo e sull'organizzazione delle varie fasi del lavoro sono stati raccolti in un diagramma di Gantt, consultabile nelle seguenti pagine.
 
-I dettagli sulle effettive giornate/uomo possono essere consultati nel seguente diagramma:
-
+\iffalse
 In questa sezione devono essere chiariti i compiti svolti da ciascun candidato nel caso in cui il gruppo abbia più di un componente.\\
 
 Deve essere inoltre esposto il piano di lavoro adottato. A tal fine, per ogni attività svolta durante la preparazione dell'elaborato (ad esempio: studio di una tecnologia, progettazione di un componente, implementazione di un algoritmo ecc…) deve essere chiarita la collocazione temporale e devono essere indicate le risorse impiegate per svolgerla (giorni/uomo). I candidati possono ricorrere a opportuni diagrammi come quello di Gantt.\\
-
 
 Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nelle immagini, schemi):
 
@@ -1289,6 +1295,7 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
  3 componenti & 2000 & 4000 \\
  \hline
 \end{tabular}
+\fi
 
 \newpage
 
