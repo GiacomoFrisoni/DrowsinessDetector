@@ -488,6 +488,7 @@ In questo progetto, la strategia di allineamento adottata consiste in una cascat
 \end{figure}
 
 \subsubsection{Rilevamento della sonnolenza}
+\label{subsubsec:ear}
 
 Per rilevare la sonnolenza, il progetto considera una misura comportamentale basata su una chiusura degli occhi protrattasi da parte del guidatore per un tempo superiore alla norma. Essere in grado di distinguere un occhio aperto da uno chiuso è di conseguenza fondamentale. A partire dai punti di riferimento facciali associati a un occhio è possibile applicare il calcolo dell'EAR, un'elegante metrica introdotta nel 2016 da \cite{EAR}.
 Ogni occhio è rappresentato da 6 coordinate (x, y), enumerate a partire dal lato sinistro e proseguenti in ordine orario lungo la parte restante della regione (come riscontrabile in Figura \ref{fig:eye_6_landmarks}).
@@ -1270,6 +1271,7 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 %----------------------------------------------------------------------------------------
 
 \section{Piano di lavoro}
+\label{sec:work_planning}
 In questa sezione sono chiariti i compiti svolti da ciascun candidato.
 
 \begin{itemize}
@@ -1309,17 +1311,15 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 %----------------------------------------------------------------------------------------
 
 \section{Conclusioni}
+Al termine dell'elaborato, i candidati si ritengono soddisfatti dei risultati raggiunti, comprendendo i limiti e le potenzialità della soluzione proposta.\\
+La scelta di adottare un approccio basato su \textit{EAR threshold} per la stima dell'apertura degli occhi (intrapresa per far fronte ai requisiti implementativi descritti nella sezione \ref{sec:requisiti}) si è dimostrata non completamente idonea, per via delle naturali differenze anatomiche che sussistono tra i vari utenti. Sul piano degli sviluppi futuri, tale problematica può essere affrontata introducendo un processo di calibrazione iniziale per il conducente o passando a una tecnica \textit{EAR HMM} (citata al paragrafo \ref{subsubsec:ear}).\\
+Le prestazioni del sistema possono essere ulteriormente migliorate evitando di applicare l'\textit{Haar Cascade Classifier} iterativamente sull'intero frame, ma concentrando la localizzazione del volto su una ROI\footnote{ROI. Region Of Interest.} (ovvero un'area comprendente la bounding box dell'ultimo viso rilevato con l'introduzione di un intorno) dal momento che un guidatore non realizza movimenti significativi.\\
+Applicando tecniche di rotazioni geometriche a un frame catturato (prima di sottoporlo alla \textit{face detection}) è anche possibile far fronte all'attuale mancato rilevamento di pose con volto inclinato\cite{FaceRotation}.\\
+È interessante osservare come molti ricercatori abbiano condotto i loro esprimenti in ambienti simulati ottenendo alte percentuali di successo, ma come queste siano poi calate drasticamente al passaggio in un ambiente reale. Come già descritto nella sezione \ref{sec:work_planning}, le accuratezza ottenute nel progetto in esame si rivelano pertanto positive.\\
+Un limite delle misure comportamentali adottate all'interno di questo progetto è stato individuto da Golz. Il suo team di ricerca ha valutato differenti prodotti commerciali per la rilevazione di fenomeni di sonnolenza ed è giunto a osservare come non sia sufficiente basarsi su una sola tipologia di misura per giudicare lo stato del veicolo e dell'utente alla guida di esso. Di conseguenza, un'ulteriore miglioria che potrebbe essere introdotta nel progetto sviluppato si riferisce alla possibilità di integrare ulteriori parametri per il riconoscimento della sonnolenza stessa (quali angolazione del volto, frequenza del battito cardiaco e superamento della segnaletica orizzontale).\\
+In ogni caso appare evidente come il passaggio a un hardware più potente possa aprire le porte a nuove tipologie di algoritmi, maggiormente efficaci e adatti a una reale soluzione commerciale.
 
-E' stato figo lavorare coi chippini. Ci mancherà il nostro Raspy.
-Calibrazione soglia EAR per utente.
-
-If a face is detected, then a region of interest in marked within the face. This region of interest contains the eyes. Defining a region of interest significantly reduces the computational requirements of the system. After that the eyes are detected from the region of interest.
-
-However, it has been found that the rate of detecting the correct feature, or the percentage of success among a number of detection attempts, varies depending on the application and number of classes. The determination of drowsiness using PERCLOS and Eye Blink has a success rate of close to 100\% [43] and 98\% [45], respectively. However it has to be noted that, the high positive detection rate achieved by [43] was when the subjects didn’t wear glasses. Likewise, as most researchers conducted their experiments in simulated environment they achieved a higher success rate. The positive detection rate decreased significantly when the experiment was carried out in a real environment [15].
-Another limitation of behavioral measure was brought out in an experiment conducted by Golz et al. They evaluated various drowsiness monitoring commercial products, and observed that driver state cannot be correlated to driving performance and vehicle status based on behavioral measures alone [57].
-
-Passaggio a HW più potente.
-
+\iffalse
 Esporre brevemente le considerazioni conclusive sul progetto presentato, indicando anche i possibili sviluppi futuri.\\
 
 Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nelle immagini, schemi):
@@ -1333,6 +1333,7 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
  3 componenti & 1500 & 3000 \\
  \hline
 \end{tabular}
+\fi
 
 \newpage
 
@@ -1344,7 +1345,7 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 \appendix
 \addcontentsline{toc}{section}{Appendice}
 \section*{Appendice}
-
+Le seguenti pagine includono materiale di approfondimento.
 
 % EAR = 0.30
 \begin{landscape}
