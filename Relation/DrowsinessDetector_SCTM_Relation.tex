@@ -62,6 +62,10 @@
 \usepackage{pythonhighlight}
 
 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%librerie per aggiungere PDF
+\usepackage{pdfpages}
+
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%libreria per l'inserimento di link nella
 %   bibliografia
 \PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
@@ -1518,6 +1522,20 @@ Vincoli circa la lunghezza della sezione (escluse didascalie, tabelle, testo nel
 		\label{table:gf_ear_26}
 	\end{table}
 \end{landscape}
+
+%\includepdf[pages=1]{pdf/drowsiness_detector_gantt.pdf}
+\includepdf[pages=1,scale=.95]{pdf/drowsiness_detector_gantt.pdf}
+
+\newgeometry{scale=1}
+\thispagestyle{empty}
+{%
+	\centering
+	\includegraphics[page=2,scale=.95]{pdf/drowsiness_detector_gantt.pdf}
+	\captionof{figure}{Diagramma Gantt}
+	\par
+}
+
+\restoregeometry
 
 \iffalse
 Laddove necessario è possibile avvalersi di appendici alla relazione per includere materiale di approfondimento.\\
