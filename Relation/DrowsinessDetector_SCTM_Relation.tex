@@ -994,7 +994,7 @@ La costruzione del dataset mediante l'utilizzo dello stesso circuito è stata po
 	\begin{subfigure}{.45\textwidth}
 		\centering
 		\includegraphics[width=.8\linewidth]{eps/home_circuit.eps}
-		\caption{Raspberry Pi connesso al Desktop per fini di analisi o debug.}
+		\caption{Raspberry Pi in configurazione Desktop per fini di analisi o debug.}
 	\end{subfigure}
 	\hspace{5mm}
 	\begin{subfigure}{.55\textwidth}
@@ -1006,11 +1006,11 @@ La costruzione del dataset mediante l'utilizzo dello stesso circuito è stata po
 	\label{fig:system_uses}
 \end{figure}
 
-Per poter realizzare l'acquisizione dei video a bordo dell'autoveicolo, si è creato un file bash \texttt{rec\_video\_launch.sh} per il lancio dello script in fase di reboot e si è alimentato il Raspberry Pi mediante l'ausilio di un power bank. Le registrazioni, per un maggior realismo e per una più alta affidabilità dei dati raccolti, sono state interamente realizzate all'interno del veicolo (sia fermo che in movimento). Nel caso di veicolo in movimento si sottolinea come tutte le riprese siano state fatte in scenari sicuri, all'interno di parcheggi isolati e con la necessaria presenza di un'altra persona. 
+Per poter realizzare l'acquisizione dei video a bordo dell'autoveicolo, si è creato un file bash \texttt{rec\_video\_launch.sh} per il lancio dello script in fase di reboot e si è alimentato il Raspberry Pi mediante l'ausilio di un power bank. Le registrazioni, per un maggior realismo e per una più alta affidabilità dei dati raccolti, sono state interamente realizzate all'interno del veicolo (sia fermo che in movimento). Nel caso di veicolo in movimento si sottolinea come tutte le riprese siano state fatte in scenari sicuri, all'interno di parcheggi isolati e con la continua sorveglianza da parte di un'altra persona. 
 % Distanza camera
 
 \subsubsection{Etichettatura}
-I video raccolti sono stati convertiti in formato \textit{mp4} e suddivisi in frame (grazie al software \quotes{Free Video to JPG Converter}\cite{FrameExtraction}). L'etichettatura è stata poi realizzata manualmente, analizzando i singoli frame e producendo un file allegato al video con l'enumerazione degli intervalli oggetto di sonnolenza (come mostrato in Figura \ref{fig:video_label}).
+I video raccolti sono stati convertiti in formato \textit{mp4} e suddivisi in frame (grazie al software \quotes{Free Video to JPG Converter}\cite{FrameExtraction}). L'etichettatura è stata poi realizzata manualmente, analizzando i singoli frame e producendo un file allegato al video con l'enumerazione degli intervalli oggetto di sonnolenza (come mostrato in Figura \ref{fig:video_label}). Le etichette di verità sono pertanto state assegnate adottando una strategia incentrata sulla valutazione dell'affaticamento nei segmenti video con self-reporting del conducente, seguendo l'approccio di classificazione binaria già adottato in diversi studi\cite{SelfReportedAnalysis}\cite{ExpertsAnalysis}. 
 
 \begin{figure}[!htb]
 	\centering
@@ -1019,9 +1019,37 @@ I video raccolti sono stati convertiti in formato \textit{mp4} e suddivisi in fr
 	\label{fig:video_label}
 \end{figure}
 
-\subsubsection{Nomenclatura}
+\subsection{Analisi delle prestazioni}
+Un passo importante in ogni ricerca è la valutazione delle prestazioni del sistema. I risultati forniti dal rilevatore di sonnolenza vengono quindi confrontati con le etichette assegnate al passo precedente. Trattandosi di un problema di classificazione binario, si è scelto di generare per ogni video una matrice di confusione (o \textit{confusion matrix}). Una matrice di confusione, nello specifico, è una tabella di facile comprensione spesso utilizzata nella descrizione delle performance di un modello di classificazione su un \textit{test set} per cui i valori di verità sono noti. Il template di una confusion matrix per il progetto in esame è riportato nella Tabella \ref{table:cm} e, come si può osservare, contiene al suo interno quattro indicatori di base relativamente alla qualità della classificazione stessa.
+\begin{itemize}
+	\item \textbf{TP}, esprime il numero di casi in cui è stata rilevata sonnolenza con conducente effettivamente assonnato.
+	\item \textbf{TN}, esprime il numero di casi in cui non è stata rilevata sonnolenza con conducente effettivamente vigile.
+	\item \textbf{FP}, indica il numero di casi in cui il classificatore ha previsto sonnolenza con conducente vigile.
+	\item \textbf{FN}, indica il numero di casi in cui il classificatore non ha previsto sonnolenza con conducente assonnato.
+\end{itemize}
 
-\subsection{Prestazioni}
+\begin{table}[!htb]
+	\centering
+	\begin{tabular}{cc|c|c|}
+		\cline{3-4}
+		&        & \multicolumn{2}{c|}{Predicted} \\ \cline{3-4} 
+		&        & Alert         & Drowsy         \\ \hline
+		\multicolumn{1}{|c|}{\multirow{2}{*}{Given}} & Alert  & TN & FP\\ \cline{2-4} 
+		\multicolumn{1}{|c|}{}                       & Drowsy & FN & TP\\ \hline
+	\end{tabular}
+	\caption{Matrice di confusione per un problema di classificazione binario sveglio/assonnato.}
+	\label{table:cm}
+\end{table}
+
+Le matrici di confusione associate a ogni video sono state generate automaticamente grazie allo sviluppo di quattro script:
+\begin{enumerate}
+	\item \texttt{drowsiness\_video\_detector.py}, è una versione alternativa dello script descritto al paragrafo \ref{subsec:main_script} incentrata sull'acquisizione dei frame da un file video (e non da uno stream) e sulla generazione di un file di testo contenente gli intervalli di frame in cui è stata rilevata sonnolenza (similarmente al processo di etichettatura);
+	\item \texttt{video\_analyzer.py}, avente il compito di analizzare tutti i video contenuti a partire da una directory radice e di produrre il file di \quotes{detection} loro associato.
+	\item \texttt{confusion\_matrix\_creator.py}, ha l'obiettivo di creare il file di testo contenente la matrice di confusione per uno specifico video (realizzando una comparazione frame-per-frame tra l'etichettatura e il file di rilevazione);
+	\item \texttt{dataset\_analyzer.py}, invoca iterativamente il metodo contenuto nello script descritto in precedenza al fine di generare le matrici di confusione globali associate alle varie categorie (restringendosi alla valutazione dei video di uno specifico conducente ove richiesto).
+\end{enumerate}
+
+Partendo dalle matrici di confusione sia di video che di categoria, è stato possibile procedere al calcolo di indicatori statistici derivati per la valutazione della qualità del rilevatore.\\
 
 \begin{equation}
 Accuracy = \frac{TP + TN}{TP + TN + FP + FN} \times 100
@@ -1040,25 +1068,105 @@ TPR = \frac{TP}{TP + FN} \times 100
 \end{equation}
 
 \begin{equation}
+TNR = \frac{TN}{TN + FP} \times 100
+\end{equation}
+
+\begin{equation}
 FPR = \frac{FP}{TN + FP} \times 100
 \end{equation}
 
-\begin{table}[h]
+\begin{equation}
+FNR = \frac{FN}{TP + FN} \times 100
+\end{equation}
+
+\vspace{0.5cm}
+I risultati derivanti dall'applicazione delle formule illustrate sono riportati in Appendice. Preme notare la gestione di due casi particolari:
+\begin{enumerate}
+	\item \textbf{TP + FN = 0.} Questo caso si verifica nei video per cui non sono presenti esempi positivi (\texttt{NoDrowsiness}) e per cui, conseguentemente, non assume significato calcolare indici focalizzati sulla loro gestione (quali \textit{Precision}, \textit{TPR} e \textit{FNR}). In tali circostanze il risultato riportato è \quotes{N/A}. 
+	\item \textbf{TP + FP = 0.} Questo caso si presenta se tutte le predizioni fatte sono negative. Per evitare una divisione per zero, si assume direttamente zero come risultato di \textit{MR} e \textit{FPR} (evidenziando una classificazione scorretta). 
+\end{enumerate}
+
+Osservando i dati raccolti, ermege l'importanza di non basarsi sulla sola accuratezza. Facendo riferimento solo a essa, infatti, si corre il rischio di sopravvalutare la bontà del classificatore poichè le due classi sono sbilanciate: il numero di frame in media in cui un utente non dorme all'interno dei video è largamente superiore a quello coinvolto da sonnolenza. Procedendo con l'analisi, emerge come le prestazioni calino sensibilmente in condizioni notturne (con scarsa illuminazione) e l'uso di occhiali non costituisca un vero problema per la rilevazione, nonostante determini comunque un calo di performance.\\
+
+Durante lo svolgimento dei test è apparso evidente il limite di un approccio basato su \textit{EAR threshold}. I due utenti con cui si sono acquisiti i video del dataset, infatti, hanno evidenziato andamenti di EAR significativamente diversi (come mostrato in Figura \ref{fig:ear_comparing}).
+Nel tentativo di stabilire un valore di soglia $EAR_{th}$ unico per entrambi i conducenti, si è costruita la curva ROC riportante l'andamento del TPR e del FPR al variare della soglia stessa. I risultati sono riassunti in Figura \ref{fig:roc}.\\
+Il compromesso tra TPR e FPR che più soddisfa le esigenze del progetto si dimostra essere quello determinato dal valore di soglia $EAR_{th} = 0.28$. Tuttavia occorre sottolineare come il TPR complessivo si attesti su percentuali basse (considerando sia scenari notturni che uso di occhiali).
+
+\subsubsection{Nomenclatura}
+\begin{itemize}
+	\item \textbf{File video:}\\\texttt{<category\_number>\_<driver>.mp4}
+	\item \textbf{Manual drowsiness labels:}\\\texttt{result\_<category\_number>\_<driver>.txt}
+	\item \textbf{Detected drowsiness labels:}\\ \texttt{result\_<category\_number>\_<driver>\_<ear\_threshold>\_det.txt}
+	\item \textbf{Video confusion matrix:}\\\texttt{result\_<category\_number>\_<driver>\_<ear\_threshold>\_cm.txt}
+	\item \textbf{Category confusion matrix:}\\\texttt{<ear\_threshold>\_cm\_tot.txt}
+\end{itemize}
+
+\begin{figure}[p]
 	\centering
-	\begin{tabular}{cc|c|c|}
-		\cline{3-4}
-		&        & \multicolumn{2}{c|}{Predicted} \\ \cline{3-4} 
-		&        & Alert         & Drowsy         \\ \hline
-		\multicolumn{1}{|c|}{\multirow{2}{*}{Given}} & Alert  & TN & FP\\ \cline{2-4} 
-		\multicolumn{1}{|c|}{}                       & Drowsy & FN & TP\\ \hline
-	\end{tabular}
-	\caption{Matrice di confusione con $EAR_{th}=0.3$.}
-	\label{table:cm_0_3}
-\end{table}
+	\begin{tikzpicture}
+	\begin{axis}[
+	width  = 0.85*\textwidth,
+	height = 13cm,
+	major x tick style = transparent,
+	ybar=3*\pgflinewidth,
+	bar width=14pt,
+	ymajorgrids = true,
+	ylabel = {Run time speed},
+	symbolic x coords={MP, GF},
+	yticklabel style={
+		/pgf/number format/fixed,
+		/pgf/number format/precision=2
+	},
+	ytick = {0.02,0.04,0.06,0.08,0.10,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28,0.30,0.32,0.34,0.36,0.38,0.40},
+	xtick = data,
+	scaled y ticks = false,
+	enlarge x limits=0.5,
+	ymin=0,
+	legend style={
+		at={(0.5,-0.1)},
+		anchor=north,
+		draw=none,
+		fill=none,
+		legend columns=1,
+		column sep=5pt
+	},
+	]
+	
+	%Max EAR Open
+	\addplot[style={bblue1,fill=bblue1,mark=none}]
+	coordinates {(MP,0.36) (GF,0.30)};	
+	
+	%Max EAR Closed
+	\addplot[style={ppurple2,fill=ppurple2,mark=none}]
+	coordinates {(MP,0.26) (GF,0.20)};
+	
+	%Min EAR Open MP
+	\node[
+	draw=none,
+	anchor=south east,
+	fill=bblue2,
+	minimum width=14pt,
+	minimum height=230pt,
+	xshift=-0.5pt]{};
+	
+	%Min EAR Open GF
+	\node[
+	draw=none,
+	anchor=south east,
+	fill=bblue2,
+	minimum width=14pt,
+	minimum height=180pt,
+	xshift=155pt]{};	
+	
+	\legend{EAR range with open eyes, Max EAR with closed eyes}
+	\end{axis}
+	\end{tikzpicture}
+	\caption{Comparazione tra i valori di EAR in media dei due conducenti. Il soggetto MP in pose con occhi aperti possiede un range di variazione dell'EAR più elevato del soggetto GF. Gli stessi risultati si riflettono nei valori massimi a occhi chiusi.}
+	\label{fig:ear_comparing}
+\end{figure}
 
-% For most of the subjects who wore glasses, negligible accuracy values were observed. This can be attributed to the fact that the Dlib shape predictor library often mistakes the upper boundaries of the lenses as the upper eyelids. This phenomenon was observed multiple times during testing. For example, in the case of one subject, we could easily perceive the upper contour settling over the upper boundary of the lens just a few frames into the video stream.
-
-\begin{center}
+\begin{figure}[p]
+	\centering
 	\framebox{\begin{tikzpicture}
 		\begin{axis}[
 		title={\textbf{ROC Curve}},
@@ -1083,71 +1191,11 @@ FPR = \frac{FP}{TN + FP} \times 100
 			(0.26, 8.29) };
 		\legend{DrowsinessDetector\\}
 		\end{axis}
-	\end{tikzpicture}}
-\end{center}
-
-
-\begin{figure}[!htb]
-	\centering
-	\begin{tikzpicture}
-		\begin{axis}[
-			width  = 0.85*\textwidth,
-			height = 13cm,
-			major x tick style = transparent,
-			ybar=3*\pgflinewidth,
-			bar width=14pt,
-			ymajorgrids = true,
-			ylabel = {Run time speed},
-			symbolic x coords={MP, GF},
-			yticklabel style={
-				/pgf/number format/fixed,
-				/pgf/number format/precision=2
-			},
-			ytick = {0.02,0.04,0.06,0.08,0.10,0.12,0.14,0.16,0.18,0.20,0.22,0.24,0.26,0.28,0.30,0.32,0.34,0.36,0.38,0.40},
-			xtick = data,
-			scaled y ticks = false,
-			enlarge x limits=0.5,
-			ymin=0,
-			legend style={
-				at={(0.5,-0.1)},
-				anchor=north,
-				draw=none,
-				fill=none,
-				legend columns=1,
-				column sep=5pt
-			},
-		]
-		
-		%Max EAR Open
-		\addplot[style={bblue1,fill=bblue1,mark=none}]
-		coordinates {(MP,0.36) (GF,0.30)};	
-		
-		%Max EAR Closed
-		\addplot[style={ppurple2,fill=ppurple2,mark=none}]
-		coordinates {(MP,0.26) (GF,0.20)};
-		
-		%Min EAR Open MP
-		\node[
-		draw=none,
-		anchor=south east,
-		fill=bblue2,
-		minimum width=14pt,
-		minimum height=230pt,
-		xshift=-0.5pt]{};
-		
-		%Min EAR Open GF
-		\node[
-		draw=none,
-		anchor=south east,
-		fill=bblue2,
-		minimum width=14pt,
-		minimum height=180pt,
-		xshift=155pt]{};	
-		
-		\legend{EAR range with open eyes, Max EAR with closed eyes}
-		\end{axis}
-	\end{tikzpicture}
+		\end{tikzpicture}}
+	\caption{Curva ROC riportante il rapporto tra TPR e FPR al variare dell'$EAR_{th}$.}
+	\label{fig:roc}
 \end{figure}
+
 
 \iffalse
 Esporre lo stato di funzionamento effettivo del sistema progettato ad elaborato concluso. Per ciascuna delle funzionalità salienti devono essere tabellate e discusse le performance riscontrate mediante opportuni test eseguiti in fase di validazione del progetto.\\
