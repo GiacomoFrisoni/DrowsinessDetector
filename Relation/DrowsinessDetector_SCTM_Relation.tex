@@ -888,7 +888,7 @@ Calcolato l'EAR si prosegue con la sua comparazione rispetto al valore di soglia
 		\includegraphics[width=.8\linewidth]{eps/gf_closed_eyes.eps}
 		\caption{Output con guidatore assonnato.}
 	\end{subfigure}
-	\caption{Output grafico fornito da \texttt{drowsiness\_stream\_detector.py}.}
+	\caption{Output grafico fornito da \texttt{drowsiness\_stream\_detector.py}. In (a) il conducente presenta un EAR superiore alla soglia e conseguentemente non è segnalato alcun allarme. In (b) è invece raffigurato un fenomeno di sonnolenza che ha portato il guidatore a chiudere gli occhi per un eccessivo numero consecutivo di frame: in alto a sinistra è segnalato l'allarme, mentre in alto a destra si può constatare il drastico calo di valore dell'EAR.}
 	\label{fig:drowsiness_output}
 \end{figure}
 
@@ -957,7 +957,7 @@ Nella conduzione delle prove sperimentali si ha avuto modo di verificare alcuni 
 	\begin{subfigure}{.3\textwidth}
 		\centering
 		\includegraphics[width=.8\linewidth]{eps/mp_upward_view.eps}
-		\caption{Volto rivolto verso l'alto.}
+		\caption{Volto parzialmente rivolto verso l'alto.}
 	\end{subfigure}
 	\par\bigskip % force a bit of vertical whitespace
 	\begin{subfigure}{.3\textwidth}
@@ -975,21 +975,26 @@ Nella conduzione delle prove sperimentali si ha avuto modo di verificare alcuni 
 	\begin{subfigure}{.3\textwidth}
 		\centering
 		\includegraphics[width=.8\linewidth]{eps/mp_downward_view.eps}
-		\caption{Volto rivolto verso il basso.}
+		\caption{Volto totalmente rivolto verso il basso.}
 	\end{subfigure}
 	\caption{Localizzazione del volto con diverse angolazioni facciali.}
 	\label{fig:face_poses}
 \end{figure}
 
-% pose testa (However, the Dlib Framework is not able to detect different positions of the driver's face such as turning the head completely right or left. In this case, these images are removed from the used dataset.)
-
 \subsection{Costruzione dataset}
-% ragioni per farsene uno proprio (non reperibilità, camera ecc.)
+Per la valutazione delle performance del progetto proposto, si è scelto di costruire un dataset ad hoc. Questa decisione è dovuta alla non reperibilità di altre collezioni di video etichettati in contesti reali o alla loro registrazione con moduli di camera differenti da quello impiegato.
+
 \subsubsection{Definizione delle categorie}
+La realizzazione di un nuovo dataset ha anche fornito l'opportunità di definire specifici scenari d'interesse per cui catturare video rappresentativi. Si è innanzitutto scelto di condurre test sia di giorno che di notte (\texttt{Day/Night}), in modo da verificare l'efficacia del sistema con diverse condizioni di luce (tipico elemento critico per progetti di Computer Vision). Per entrambe le categorie si sono poi creati video sia con esempi positivi che senza (\texttt{Drowsiness/NoDrowsiness}), ovvero con presenza di fenomeni di sonnolenza e non. Per ognuna di queste sottocategorie si sono svolte prove con e senza occhiali (\texttt{Glasses/NoGlasses}): gli occhiali, infatti, sono un classico elemento di disturbo per gli algoritmi di face detection. Infine, nuovamente per ogni sottocategoria, si è fatta distinzione tra video con una posa statica dell'utente e video dinamici (\texttt{Static/Dynamic}). Alla base di tale scelta vi è la volontà di osservare il comportamento del rilevatore anche in contesti in cui il conducente sorride ed effettua movimenti di varia natura che potrebbero compromettere sia l'efficacia di Haar che la stima dell'EAR, a causa di involontari cali di aspect ratio dovuti alle espressioni facciali. In conclusione, si osserva come i video siano stati pertanto suddivisi in 16 ($2^4$) categorie.
+
 \subsubsection{Acquisizione video}
 % Presentazione dello script dei 30 secondi
 % Posizionamento camera e distanza in macchina
+% In macchina (don't try this at home)
 % Foto esempio
+\subsubsection{Etichettatura}
+% Manuale
+% File di accompagnamento
 \subsubsection{Nomenclatura}
 
 \subsection{Prestazioni}
